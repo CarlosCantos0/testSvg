@@ -1,0 +1,20 @@
+<canvas  id="canvas"></canvas>
+<button (click)="exportToSVG()">Guardar SVG</button>
+
+<input *ngIf="editar" type="color" id="color" [value]="objetoSeleccionado!.fill" (change)="actualizarColor($event)" />
+
+<div class="figuras-list">
+  <ul>
+    <li *ngFor="let figura of figuras; let i = index" (click)="seleccionarFiguraLista(figura!)">
+      Figura {{ figura.forma + ' ' + i }}
+    </li>
+  </ul>
+</div>
+
+<div class="propiedades-figura" *ngIf="objetoSeleccionado">
+  <p>Figura Seleccionada: {{ objetoSeleccionado }}</p>
+  <p>Coordenada X: {{ objetoSeleccionado.left }}</p>
+  <p>Coordenada Y: {{ objetoSeleccionado.top }}</p>
+<input type="color" id="color" [value]="objetoSeleccionado!.fill" (change)="actualizarColor($event)" />
+</div>
+

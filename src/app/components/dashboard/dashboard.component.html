@@ -1,0 +1,29 @@
+<p>dashboard works!</p>
+<div>
+
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="600" class="p-3">
+  <ng-container *ngFor="let figura of elementosAlmacen">
+    <ng-container *ngIf="figura.forma === 'cuadrado-rectangulo'">
+
+        <!-- Cuadrado o Rectángulo -->
+      <rect [attr.x]="figura.coordX" [attr.y]="figura.coordY" [attr.width]="figura.width"
+        [attr.height]="figura.height" [attr.fill]="figura.fill ? figura.stroke : 'none'"
+        [attr.stroke]="figura.stroke" [attr.stroke-width]="figura.strokeWidth" />
+    </ng-container>
+    <ng-container *ngIf="figura.forma === 'texto'">
+        <!-- Texto -->
+      <text [attr.x]="figura.coordX" [attr.y]="figura.coordY" [attr.font-family]="figura.fonts"
+        [attr.font-size]="figura.sizeLetter" [attr.fill]="figura.stroke">
+        {{ figura.text }}
+      </text>
+    </ng-container>
+    <ng-container *ngIf="figura.forma === 'linea'">
+        <!-- Línea -->
+      <line [attr.x1]="figura.x1" [attr.y1]="figura.y1" [attr.x2]="figura.x2" [attr.y2]="figura.y2"
+        [attr.stroke]="figura.stroke" [attr.stroke-width]="figura.strokeWidth" />
+    </ng-container>
+  </ng-container>
+</svg>
+SE ACABA DASHBOARD
+<p>EMPIEZA VISTA PREVIAS</p>
+</div>
