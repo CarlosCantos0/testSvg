@@ -7,11 +7,9 @@ import { SvgServiceService } from 'src/app/services/svg-service.service';
 import { CanvasService } from '../../services/canvas.service';
 
 export interface LineCodoMap {
-  line: fabric.Line;
-  codos: fabric.Circle[];
-  linesConnected: fabric.Line[];
-  pointAzul1: fabric.Circle | null;
-  pointAzul2: fabric.Circle | null;
+  lines: fabric.Line[];     // Array que almacena las dos líneas
+  codo: fabric.Circle[];      // Círculo que representa el codo
+  puntos: fabric.Circle[];  // Array que almacena los dos puntos azules (extremos)
 }
 
 @Component({
