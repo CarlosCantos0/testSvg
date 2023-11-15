@@ -9,6 +9,8 @@ import { FiguraService } from './services/figura.service';
 import { CodoService } from './services/codo.service';
 import { SvgServiceService } from './services/svg-service.service';
 import { CanvasService } from './services/canvas.service';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import {MatMenuModule} from '@angular/material/menu';
 
 @NgModule({
   declarations: [
@@ -19,6 +21,8 @@ import { CanvasService } from './services/canvas.service';
   imports: [
     BrowserModule,
     AppRoutingModule,
+    BrowserAnimationsModule,
+    MatMenuModule
   ],
   providers: [
     FiguraService,

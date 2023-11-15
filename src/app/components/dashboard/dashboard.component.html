@@ -7,7 +7,7 @@
 
         <!-- Cuadrado o Rectángulo -->
       <rect [attr.x]="figura.coordX" [attr.y]="figura.coordY" [attr.width]="figura.width"
-        [attr.height]="figura.height" [attr.fill]="figura.fill ? figura.stroke : 'none'"
+        [attr.height]="figura.height" [attr.fill]="figura.rellenado ? figura.fill : 'none'"
         [attr.stroke]="figura.stroke" [attr.stroke-width]="figura.strokeWidth" />
     </ng-container>
     <ng-container *ngIf="figura.forma === 'texto'">

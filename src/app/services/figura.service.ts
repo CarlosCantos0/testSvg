@@ -10,6 +10,8 @@ import { CanvasService } from './canvas.service';
 })
 export class FiguraService {
 
+  num: number = 1;
+
   private canvas: fabric.Canvas | undefined;
   objetoSeleccionado: fabric.Object | undefined;
   codoMode: boolean = true;
@@ -21,18 +23,20 @@ export class FiguraService {
   }
 
   crearRectangulo(figura: SvgBase): fabric.Rect {
-    this.canvas!.sendToBack(this.objetoSeleccionado!)
-
     const rectangulo = new fabric.Rect({
       width: figura.width,
       height: figura.height,
       left: figura.coordX,
       top: figura.coordY,
-      fill: figura.stroke,
+      fill: figura.fill,
+      stroke: figura.stroke,
       name: figura.id.toString(),
       opacity: 0.65,
+
       // Otras propiedades específicas del rectángulo...
     });
+
+
 
     this.canvas!.sendToBack(this.objetoSeleccionado!)
     rectangulo.on('mousedown', (options) => {
@@ -40,7 +44,6 @@ export class FiguraService {
     });
 
     return rectangulo;
-
   }
 
   crearTexto(figura: SvgBase): fabric.Text {
@@ -49,7 +52,8 @@ export class FiguraService {
       top: figura.coordY,
       fontFamily: figura.fonts,
       fontSize: figura.sizeLetter,
-      fill: figura.stroke,
+      fill: figura.fill,
+      stroke: figura.stroke,
       name: figura.id.toString(),
       // Otras propiedades específicas del texto...
     });

@@ -1,10 +1,11 @@
-import { Component, ElementRef, EventEmitter, OnInit, ViewChild } from '@angular/core';
+import { Component, ElementRef, EventEmitter, HostListener, OnInit, ViewChild } from '@angular/core';
 import { fabric } from 'fabric';
 import { SvgBase } from 'src/app/interfaces/svgBase.interface';
 import { CodoService } from 'src/app/services/codo.service';
 import { FiguraService } from 'src/app/services/figura.service';
 import { SvgServiceService } from 'src/app/services/svg-service.service';
 import { CanvasService } from '../../services/canvas.service';
+import { MatMenuTrigger } from '@angular/material/menu';
 
 export interface LineCodoMap {
   lines: fabric.Line[];     // Array que almacena las dos líneas
@@ -15,9 +16,12 @@ export interface LineCodoMap {
 @Component({
   selector: 'app-vista-previa',
   templateUrl: './vista-previa.component.html',
-  styleUrls: ['./vista-previa.component.css']
+  styleUrls: ['./vista-previa.component.css'],
+
 })
 export class VistaPreviaComponent implements OnInit {
+
+  @ViewChild(MatMenuTrigger) contextMenu!: MatMenuTrigger;
 
   lineCodoMaps: LineCodoMap[] = [];
   movingBluePoint: boolean = false;
@@ -31,6 +35,7 @@ export class VistaPreviaComponent implements OnInit {
   editar: boolean = false;
 
   codoMode: boolean = true; // Modo de creación de codos
+  inputColorLinea: boolean = true;
 
   constructor(private svg: SvgServiceService, private figuraService: FiguraService, private codoService: CodoService, private canvasService: CanvasService) { }
 
@@ -39,6 +44,13 @@ export class VistaPreviaComponent implements OnInit {
     this.canvas = this.canvasService.inicializarCanvas();
     // Obtiene las figuras del servicio
     this.dibujarFigurasEnCanvas();
+  }
+
+  esLinea(seleccionado: object) {
+    if (seleccionado instanceof fabric.Line) {
+      return false;
+    }
+    return true;
   }
 
   // Función para dibujar las figuras en el canvas
@@ -63,7 +75,23 @@ export class VistaPreviaComponent implements OnInit {
           this.objetoSeleccionado = canvaObject;
         });
       }
+
+      this.canvas!.on('selection:cleared', () => {
+        this.objetoSeleccionado = undefined; // Cuando se deselecciona, ObjetoSeleccionado es null
+      });
     });
+  }
+
+  @HostListener('window:contextmenu', ['$event'])
+  public onContextMenu(event: MouseEvent) {
+    // console.log(event)
+    event.preventDefault();
+    this.showContextMenu(this.objetoSeleccionado!.left!, this.objetoSeleccionado!.top!);
+  }
+
+  //Devolvemos el almacen por el console.log para ver si se actualizan bien los datos
+  devolverAlmacen() {
+    this.codoService.devolverAlmacen();
   }
 
   crearCodo(linea: fabric.Line, pointer: { x: number, y: number }) {
@@ -77,22 +105,35 @@ export class VistaPreviaComponent implements OnInit {
     const objetoCanvas = this.canvas?.getObjects().find(obj => obj.name === id);
 
     if (objetoCanvas) {
-      console.log(objetoCanvas)
+      //console.log(objetoCanvas)
       this.canvas!.setActiveObject(objetoCanvas);
       this.objetoSeleccionado = objetoCanvas;
-      this.objetoSeleccionado.scaleY! *= 0.9999999;
     }
+    this.canvas!.renderAll();
   }
 
   // Forzamos la actualización del color reduciendo el tamaño del objeto seleccionado
   actualizarColor(event: any) {
     if (this.canvas) {
       if (this.objetoSeleccionado) {
-        this.objetoSeleccionado.stroke = event.target.value;
         this.objetoSeleccionado.fill = event.target.value;
         this.objetoSeleccionado.scaleX! *= 0.9999999; // Reduce la escala en un 0.0001% en el eje X para forzar una actualizacion del color
         this.objetoSeleccionado.scaleY! *= 0.9999999; // Reduce la escala en un 0.0001% en el eje Y
-        this.canvas.renderAll();
+        this.canvas!.renderAll();
+        this.editar = false;
+        //console.log(this.objetoSeleccionado!);
+        //this.objetoModificado();
+      }
+    }
+  }
+
+  actualizarColorBorde(event: any) {
+    if (this.canvas) {
+      if (this.objetoSeleccionado) {
+        this.objetoSeleccionado.stroke = event.target.value;
+        this.objetoSeleccionado.scaleX! *= 0.9999999; // Reduce la escala en un 0.0001% en el eje X para forzar una actualizacion del color
+        this.objetoSeleccionado.scaleY! *= 0.9999999; // Reduce la escala en un 0.0001% en el eje Y
+        this.canvas!.renderAll();
         this.editar = false;
         //console.log(this.objetoSeleccionado!);
         //this.objetoModificado();
@@ -125,6 +166,34 @@ export class VistaPreviaComponent implements OnInit {
       // Aquí svgString contiene el contenido SVG generado
       console.log(svgString);
     }
+  }
+
+  showContextMenu(x: number, y: number): void {
+    this.contextMenu.menu!.focusFirstItem('mouse');
+
+    // Abrir el menú contextual en las coordenadas x, y
+    this.contextMenu.menuData = {
+      x: `${x}px`,
+      y: `${y}px`
+    };
+
+    this.contextMenu.openMenu();
+  }
+
+  traerAlFrente(): void {
+    const clickedObject = this.canvas!.getActiveObject();
+    if (clickedObject) {
+      this.canvas!.bringToFront(clickedObject);
+    }
+    this.contextMenu.closeMenu();
+  }
+
+  llevarAlFondo(): void {
+    const clickedObject = this.canvas!.getActiveObject();
+    if (clickedObject) {
+      this.canvas!.sendToBack(clickedObject);
+    }
+    this.contextMenu.closeMenu();
   }
 
 }
