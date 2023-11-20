@@ -3,7 +3,7 @@ import { FiguraService } from './figura.service';
 import { CodoService } from './codo.service';
 import { fabric } from 'fabric';
 import { SvgBase } from '../interfaces/svgBase.interface';
-import { SvgServiceService } from './svg-service.service';
+import { SvgService } from './svg-service.service';
 
 
 @Injectable({
@@ -16,7 +16,7 @@ export class CanvasService {
   private figuras: SvgBase[] = [];
 
 
-  constructor( private svg: SvgServiceService, private figuraService: FiguraService, private codoService: CodoService) {}
+  constructor( private svg: SvgService, private figuraService: FiguraService, private codoService: CodoService) {}
 
 
   inicializarCanvas(): fabric.Canvas {
@@ -26,7 +26,7 @@ export class CanvasService {
       backgroundColor: 'white', // Color de fondo del lienzo
       selection: true, // Habilita la selección de objetos
       selectionBorderColor: 'blue', // Color del borde de selección
-      selectionLineWidth: 2, // Ancho del borde de selección
+      selectionLineWidth: 1, // Ancho del borde de selección
     });
 
     this.figuraService.inicializar(this);
@@ -53,14 +53,13 @@ export class CanvasService {
       //Evento cada vez que dejo de clickar
       this.canvas.on('mouse:down', (event) => {
         if (event.target) {
-          // Si se hizo clic en un objeto, asigna ese objeto a objetoSeleccionado
-          this.actualizarFigura(event);
+          this.seleccionObjeto(event);
         }
       });
     }
   }
 
-  actualizarFigura(event: any) {
+  seleccionObjeto(event: any) {
     this.objetoSeleccionado = event.target;
   }
 }

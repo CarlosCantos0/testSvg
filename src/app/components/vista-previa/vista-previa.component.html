@@ -8,7 +8,8 @@
 
 <br>
 
-<button (click)="exportToSVG()">Guardar SVG</button>
+
+<button (click)="exportarSVG()">Guardar SVG</button>
 <button (click)="devolverAlmacen()">Console del almacen</button>
 
 <div class="figuras-list">
@@ -19,16 +20,18 @@
   </ul>
 </div>
 
+
+
 <div class="propiedades-figura" *ngIf="objetoSeleccionado">
+  <div *ngIf="esLinea(objetoSeleccionado)">
+    <label for="color">Selecciona el color de relleno: </label>
+    <input type="color" id="color" [value]="objetoSeleccionado!.fill" (change)="actualizarColor($event)" />
+    </div>
+    <br>
+    <label for="color">Selecciona el color del borde: </label>
+    <input type="color" id="color" [value]="objetoSeleccionado!.stroke" (change)="actualizarColorBorde($event)" />
+
   <p>Figura Seleccionada: {{ objetoSeleccionado }}</p>
   <p>Coordenada X: {{ objetoSeleccionado.left }}</p>
   <p>Coordenada Y: {{ objetoSeleccionado.top }}</p>
-<div *ngIf="esLinea(objetoSeleccionado)">
-<label for="color">Selecciona el color de relleno: </label>
-<input type="color" id="color" [value]="objetoSeleccionado!.fill" (change)="actualizarColor($event)" />
 </div>
-<br>
-<label for="color">Selecciona el color del borde: </label>
-<input type="color" id="color" [value]="objetoSeleccionado!.stroke" (change)="actualizarColorBorde($event)" />
-</div>
-

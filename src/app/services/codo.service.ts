@@ -1,8 +1,26 @@
-import { Injectable, inject } from '@angular/core';
+import { EventEmitter, Injectable, inject } from '@angular/core';
 import { fabric } from 'fabric';
 import { LineCodoMap } from '../components/vista-previa/vista-previa.component';
-import { Circle, IEvent } from 'fabric/fabric-impl';
 
+interface lineaParams {
+  lineaOriginal?: fabric.Line;
+  linea1: fabric.Line;
+  linea2: fabric.Line;
+  codo: fabric.Circle;
+  punto1?: fabric.Circle;
+  punto2?: fabric.Circle;
+}
+
+interface LineHandler {
+  line: fabric.Line;
+  startElement: fabric.Circle;
+  endElement: fabric.Circle;
+}
+
+interface CodoData {
+  lineas: [fabric.Line, fabric.Line]; // Array con las líneas asociadas al codo
+  puntosControl: [fabric.Circle, fabric.Circle]; // Array con los puntos de control asociados al codo
+}
 
 type Punto = {
   x: number;
@@ -17,12 +35,15 @@ export class CodoService {
 
   private canvas: fabric.Canvas | undefined;
   private lineCodoMaps: LineCodoMap[] = [];
-  movingBluePoint: boolean = false;
+  private lineaConexion: LineHandler[] = [];
+
+  private codosData: Map<fabric.Circle, CodoData[]> = new Map();
+
+
   id: number = 0;
-  //conexiones: Conexiones = {};
 
   // Estructura de mapeo de codos y líneas
-  private conexionCodoLineaMap: Map<fabric.Circle, { linea1: fabric.Line, linea2: fabric.Line }> = new Map();
+  //private conexionCodoLineaMap: Map<fabric.Circle, { linea1: fabric.Line, linea2: fabric.Line }> = new Map();
 
   constructor() { }
 
@@ -30,7 +51,7 @@ export class CodoService {
     this.canvas = canvas;
   }
 
-  eliminarLineaDelCanvas(linea: fabric.Line): void {
+  private eliminarLineaDelCanvas(linea: fabric.Line): void {
     this.canvas!.remove(linea);
 
     // Eliminar la referencia de la línea en lineCodoMaps
@@ -38,26 +59,66 @@ export class CodoService {
     if (indiceMapa !== -1) {
       const map = this.lineCodoMaps[indiceMapa];
       map.lines = map.lines.filter(l => l !== linea);
-      console.log(map.lines)
+      //console.log(map.lines)
     }
 
-    // Eliminar la referencia de la línea en el mapa conexionCodoLineaMap
-    for (const [codo, lineas] of this.conexionCodoLineaMap) {
-      if (lineas.linea1 === linea || lineas.linea2 === linea) {
-        this.conexionCodoLineaMap.delete(codo);
-        break;
-      }
-    }
+    // Eliminar la referencia de la línea en lineaConexion
+    this.lineaConexion = this.lineaConexion.filter(entry => entry.line !== linea);
+
+    // Eliminar la referencia de la línea en codosData
+    this.codosData.forEach((codosData, codo) => {
+      codosData.forEach(codoData => {
+        const index = codoData.lineas.indexOf(linea);
+        if (index !== -1) {
+          codoData.lineas.splice(index, 1);
+        }
+      });
+    });
+
   }
 
   // Agregar las líneas asociadas a un codo al mapa
-  agregarLineasACodo(codo: fabric.Circle, linea1: fabric.Line, linea2: fabric.Line): void {
-    this.conexionCodoLineaMap.set(codo, { linea1, linea2 });
+  private agregarPuntosLinea(linea: fabric.Line, puntoInicio: fabric.Circle, puntoFinal: fabric.Circle): void {
+    this.lineaConexion.push({ line: linea, startElement: puntoInicio, endElement: puntoFinal });
+    //!TO DO; Conexion de la linea con los distintos puntos
+    console.log(this.lineaConexion);
   }
 
-  crearCodo(linea: fabric.Line, pointer: { x: number, y: number }) {
+  devolverConexionMap() {
+    console.log(this.lineaConexion);
+  }
+
+  realizarCodoYLineas(linea: fabric.Line, pointer: { x: number, y: number }) {
     const { x1, y1, x2, y2 } = linea;
-    const codo = new fabric.Circle({
+
+    const codo = this.crearCodo(pointer);
+
+
+    this.canvas!.bringToFront(codo);
+    const codoPosition = codo.getCenterPoint();
+
+    const puntoA: Punto = { x: x2!, y: y2!, id: 'Punto' + this.id.toString() };
+    const puntoB: Punto = { x: x1!, y: y1!, id: 'Punto' + this.id.toString() };
+
+    const punto1 = this.puntoAzulBuscarCercania(puntoA.x, puntoA.y);
+    const punto2 = this.puntoAzulBuscarCercania(puntoB.x, puntoB.y);
+    console.log(this.id)
+
+    const [linea1, linea2] = this.crearNuevasLineas(linea, codoPosition);
+
+    console.log(this.codosData)
+
+    this.eliminarLineaDelCanvas(linea);
+    this.agregarElementosAlCanvas({ codo, linea1, linea2, punto1, punto2 });
+    this.actualizarLineCodoMap({ lineaOriginal: linea, linea1, linea2, codo, punto1, punto2 });
+    this.actualizarLineasEnMovimiento({ linea1, linea2, codo: codo });
+
+    console.log(this.lineCodoMaps);
+  }
+
+  crearCodo(pointer: { x: number, y: number }): fabric.Circle {
+    this.id++;
+    return new fabric.Circle({
       left: pointer.x,
       top: pointer.y,
       radius: 10,
@@ -66,32 +127,54 @@ export class CodoService {
       hasControls: false,
       name: 'codo' + this.id.toString(),
     });
+  }
 
-    const codoPosition = codo.getCenterPoint();
-
-    // Calcula la longitud original de las líneas
-    const originalLength1 = this.distanciaEntrePuntos({ x: x1!, y: y1! }, codoPosition);
-    const originalLength2 = this.distanciaEntrePuntos(codoPosition, { x: x2!, y: y2! });
-
-    // Crea un puntos azules en los extremos opuestos de las líneas al codo
-    const puntoA: Punto = { x: x2!, y: y2!, id: 'Punto' + this.id.toString() };
-    const puntoB: Punto = { x: x1!, y: y1!, id: 'Punto' + this.id.toString() };
-
-    //Creación de puntos de control
-    const punto1 = this.crearPuntoAzul(puntoA.x, puntoA.y);
-    const punto2 = this.crearPuntoAzul(puntoB.x, puntoB.y);
-
-
-    // Crea dos nuevas líneas
+  crearNuevasLineas(linea: fabric.Line, codoPosition: fabric.Point): [fabric.Line, fabric.Line] {
+    const { x1, y1, x2, y2 } = linea;
     const nuevaLinea1 = this.crearNuevaLinea([x1!, y1!, codoPosition.x, codoPosition.y], linea.stroke!, linea.strokeWidth!);
     const nuevaLinea2 = this.crearNuevaLinea([codoPosition.x, codoPosition.y, x2!, y2!], linea.stroke!, linea.strokeWidth!);
+    return [nuevaLinea1, nuevaLinea2];
+  }
 
-    this.eliminarLineaDelCanvas(linea);
+  agregarElementosAlCanvas(params: lineaParams): void {
+    const { codo, linea1, linea2, punto1, punto2 } = params;
+    if (punto1 === undefined || punto2 === undefined) {
+      this.canvas!.add(codo, linea1, linea2);
+    } else if (punto2 === undefined) {
+      this.canvas!.add(codo, linea1, linea2, punto1);
+    } else if (punto1 === undefined) {
+      this.canvas!.add(codo, linea1, linea2, linea2)
+    } else {
+      this.canvas!.add(codo, linea1, linea2, punto1!, punto2!);
+    }
+    this.agregarPuntosLinea(linea2, codo, punto1!); //COMPORTAMIENTO DE LAS LINEAS AL SEGUIR AL CODO
+    this.agregarPuntosLinea(linea1, punto2!, codo);
+  }
 
-    // Después, eliminas las líneas del array `existingMap.lines`
-    this.canvas!.add(codo, nuevaLinea1, nuevaLinea2);
-    this.agregarLineasACodo(codo, nuevaLinea1, nuevaLinea2);
+  actualizarLineCodoMap(params: lineaParams): void {
+    const { lineaOriginal: linea, linea1, linea2, codo, punto1, punto2 } = params;
 
+    this.eliminarLineaDelCanvas(linea!);
+    this.lineCodoMaps = this.getLineCodoMap({
+      linea1: linea1, linea2: linea2, codo: codo,
+      punto1: punto1, punto2: punto2
+    });
+
+    this.codosData.forEach((codosData, codo) => {
+      codosData.forEach(codoData => {
+        const index = codoData.lineas.indexOf(linea!);
+        if (index !== -1) {
+          codoData.lineas[index] = linea1;
+        }
+      });
+    });
+
+
+  }
+
+  private getLineCodoMap(params: lineaParams): LineCodoMap[] {
+    // Accede a los parámetros mediante el objeto params
+    const { linea1, linea2, codo, punto1, punto2 } = params;
 
     // Busca si ya existe un LineCodoMap con la línea actual
     const existingMapIndex = this.lineCodoMaps.findIndex(map => map.codo);
@@ -99,40 +182,130 @@ export class CodoService {
     if (existingMapIndex !== -1) {
       // Si existe, actualiza la información existente
       const existingMap = this.lineCodoMaps[existingMapIndex];
-      existingMap.lines.push(nuevaLinea1, nuevaLinea2);
+      existingMap.lines.push(linea1, linea2);
       existingMap.codo.push(codo);
-      existingMap.puntos.push(punto1, punto2);
+
+      //existingMap.puntos.push(punto1!, punto2!);
     } else {
       // Si no existe, crea un nuevo LineCodoMap
       this.lineCodoMaps.push({
-        lines: [nuevaLinea1, nuevaLinea2],
+        lines: [linea1, linea2],
         codo: [codo],
-        puntos: [punto1, punto2],
+        puntos: [punto1!, punto2!],
       });
     }
 
-    //Eliminamos la linea del almacen
-    this.lineCodoMaps[0].lines = this.lineCodoMaps[0].lines.filter(line => line !== linea);
+    const codosDataCodo = this.codosData.get(codo);
 
-    this.actualizarLineasEnMovimiento(codo, nuevaLinea1, nuevaLinea2, originalLength1, originalLength2);
+    if (codosDataCodo !== undefined) {
+      codosDataCodo.push({
+        lineas: [linea1, linea2],
+        puntosControl: [punto1!, punto2!],
+      });
+    } else {
+      this.codosData.set(codo, [{
+        lineas: [linea1, linea2],
+        puntosControl: [punto1!, punto2!],
+      }]);
+    }
 
-    // Agrega el punto azul al lienzo
-    this.canvas!.add(punto1, punto2);
-    console.log(punto1, punto2)
-    console.log(this.lineCodoMaps)
-
-    // Evento al hacer clic en el codo
-    codo.on('mousedown', (event) => {
-      if (event.target!.name === 'codo') {
-        this.movingBluePoint = false;
-      }
-      this.canvas!.renderAll();
-    });
-
+    return this.lineCodoMaps
   }
 
-  devolverAlmacen() {
-    console.log(this.lineCodoMaps)
+
+
+  private crearNuevaLinea(points: number[], stroke: string, strokeWidth: number): fabric.Line {
+    this.id++;
+    return new fabric.Line(points, {
+      stroke,
+      strokeWidth,
+      name: 'linea' + this.id.toString(),
+    });
+  }
+
+  private actualizarLineasEnMovimiento(params: lineaParams) {
+    const { codo } = params;
+
+    //const lineasAsociadas = this.obtenerLineasAsociadas(codo, this.lineCodoMaps[0].lines );
+
+    this.canvas!.off('object:moving');
+
+    this.canvas!.on('object:moving', (event) => {
+      const codoMap = this.lineCodoMaps.find(map => map.codo);
+
+      if (codoMap && codoMap.puntos) {
+        this.actualizarLineas(event);
+        this.canvas!.renderAll();
+      }
+    });
+  }
+
+  devolverMapa() {
+    console.log(this.codosData)
+  }
+
+  private actualizarLineas(event: fabric.IEvent): void {
+    if (event.target?.name?.startsWith('codo')) this.movimientoCodo(event);
+    else if (event.target!.name?.startsWith('punto')) this.movimientoPunto(event);
+  }
+
+  movimientoCodo(event: fabric.IEvent) {
+    const codo = event.target as fabric.Circle;
+    const codosDataCodo = this.codosData.get(codo);
+
+    if (codosDataCodo) {
+        codosDataCodo.forEach(codoData => {
+            const [linea1, linea2] = codoData.lineas;
+            const [punto1, punto2] = codoData.puntosControl;
+
+            if (punto1 && punto2) {
+                const startPoint = punto1.getCenterPoint();
+                const endPoint = punto2.getCenterPoint();
+
+                if (linea1) {
+                    linea1.set({ x1: startPoint.x, y1: startPoint.y, x2: codo.left!, y2: codo.top! });
+                }
+
+                if (linea2) {
+                    linea2.set({ x1: codo.left!, y1: codo.top!, x2: endPoint.x, y2: endPoint.y });
+                }
+            }
+        });
+
+        this.canvas!.renderAll();
+    }
+}
+
+movimientoPunto(event: fabric.IEvent) {
+    const tolerancia = 40;
+    const lineasAsociadas = this.obtenerLineasAsociadas(event.target as fabric.Circle, this.lineaConexion);
+
+    if (lineasAsociadas) {
+        lineasAsociadas.forEach(linea => {
+            const startPoint = this.distanciaEntrePuntos({ x: linea.x1!, y: linea.y1! }, { x: event.target!.left!, y: event.target!.top! }) < tolerancia;
+            const endPoint = this.distanciaEntrePuntos({ x: linea.x2!, y: linea.y2! }, { x: event.target!.left!, y: event.target!.top! }) < tolerancia;
+
+            if (startPoint) {
+                linea.set({ x1: event.target!.left, y1: event.target!.top });
+            } else if (endPoint) {
+                linea.set({ x2: event.target!.left, y2: event.target!.top });
+            }
+        });
+
+        this.canvas!.renderAll();
+    }
+}
+
+  private obtenerLineasAsociadas(punto: fabric.Circle, lineas: LineHandler[]): fabric.Line[] {
+    const lineasAsociadas: fabric.Line[] = [];
+
+    lineas.forEach((lineHandler: LineHandler) => {
+      if (lineHandler.startElement === punto || lineHandler.endElement === punto) {
+        lineasAsociadas.push(lineHandler.line);
+      }
+    });
+
+    return lineasAsociadas;
   }
 
   distanciaEntrePuntos(p1: { x: number, y: number }, p2: { x: number, y: number }) {
@@ -141,113 +314,7 @@ export class CodoService {
     return Math.sqrt(dx * dx + dy * dy);
   }
 
-  private crearNuevaLinea(points: number[], stroke: string, strokeWidth: number): fabric.Line {
-    return new fabric.Line(points, {
-      stroke,
-      strokeWidth,
-      name: `linea${this.id.toString()}`,
-    });
-  }
-
-  private actualizarLineasEnMovimiento(codo: fabric.Circle, linea1: fabric.Line, linea2: fabric.Line, originalLength1: number, originalLength2: number) {
-    this.canvas!.off('object:moving');
-
-    this.canvas!.on('object:moving', (event) => {
-      //console.log(event)
-      const codoMap = this.lineCodoMaps.find(map => map.codo);
-
-      if (codoMap && codoMap.puntos) {
-        this.actualizarLineas(event, codo, linea1, this.lineCodoMaps);
-        this.actualizarLineas(event, codo, linea2, this.lineCodoMaps);
-        this.canvas!.renderAll();
-      }
-    });
-  }
-
-  actualizarLineas(event: fabric.IEvent, codo: fabric.Circle, linea: fabric.Line, lineCodoMaps: LineCodoMap[]): void {
-    const lineasAsociadas = this.conexionCodoLineaMap.get(codo);
-    let [x1, y1, x2, y2] = [lineCodoMaps[0].puntos[0].left!, lineCodoMaps[0].puntos[0].top!, lineCodoMaps[0].puntos[1].left!, lineCodoMaps[0].puntos[1].top!];
-
-    if (lineasAsociadas) {
-      let primeraLinea = true;
-
-      const linea1 = lineasAsociadas.linea1;
-      const linea2 = lineasAsociadas.linea2;
-      //console.log(event.target?.name)
-
-      for (const [, linea] of Object.entries(lineasAsociadas)) {
-        const codoPosition = codo.getCenterPoint();
-        if (event.target?.name === 'punto1') {
-          x1 = event.target!.left!
-          lineCodoMaps[0].puntos[0].left! = x1;
-          y1 = event.target!.top!
-          lineCodoMaps[0].puntos[0].top! = y1;
-        } else if (event.target?.name === 'punto2') {
-          x2 = event.target!.left!
-          lineCodoMaps[0].puntos[1].left! = x2;
-          y2 = event.target!.top!
-          lineCodoMaps[0].puntos[1].top! = y2;
-        }
-
-        if (event.target?.name === 'punto3') {
-          x1 = event.target!.left!
-          lineCodoMaps[0].puntos[2].left! = x1;
-          y1 = event.target!.top!
-          lineCodoMaps[0].puntos[2].top! = y1;
-        } else if (event.target?.name === 'punto4') {
-          x2 = event.target!.left!
-          lineCodoMaps[0].puntos[3].left! = x2;
-          y2 = event.target!.top!
-          lineCodoMaps[0].puntos[3].top! = y2;
-        }
-
-        const lineaDelPunto = this.getLineConnectedToPoint(lineCodoMaps[0], event.target as Circle)
-
-
-        //console.log(x1, y1, x2, y2)
-        linea1.set({ x1: codoPosition.x, y1: codoPosition.y, x2: x2, y2: y2 });
-        linea2.set({ x1: x1, y1: y1, x2: codoPosition.x, y2: codoPosition.y });
-
-      }
-    }
-  }
-
-  // Función para encontrar el LineCodoMap dado una línea
-  getLineCodoMapByLine(line: fabric.Line): LineCodoMap | undefined {
-    return this.lineCodoMaps.find((map) => map.lines.includes(line));
-  }
-
-  ajustarLineas(codo: fabric.Circle, puntosControl: fabric.Circle[], lines: fabric.Line[]): void {
-    puntosControl.forEach((punto, index) => {
-      const linea = lines[index];
-      linea.set({
-        x1: codo.left,
-        y1: codo.top,
-        x2: punto.left,
-        y2: punto.top
-      });
-    });
-  }
-
-  // Función para obtener la línea conectada a un punto
-  getLineConnectedToPoint(lineCodoMap: LineCodoMap, point: fabric.Circle): fabric.Line | undefined {
-    const tolerancia = 5; // Tolerancia para considerar que el punto está cerca de la línea
-
-    for (const line of lineCodoMap.lines) {
-      // Verificar si el punto está cerca de los extremos de la línea con una tolerancia
-      if (
-        (Math.abs(line.x1! - point.left!) <= tolerancia && Math.abs(line.y1! - point.top!) <= tolerancia) ||
-        (Math.abs(line.x2! - point.left!) <= tolerancia && Math.abs(line.y2! - point.top!) <= tolerancia)
-      ) {
-        return line;
-      }
-    }
-
-    return undefined;
-  }
-
-  // Función para crear un punto azul
-  private crearPuntoAzul(left: number, top: number): fabric.Circle {
+  crearPuntoAzul(left: number, top: number) {
     this.id++;
     return new fabric.Circle({
       left,
@@ -256,7 +323,66 @@ export class CodoService {
       fill: 'blue',
       hasBorders: false,
       hasControls: false,
-      name: `punto${this.id.toString()}`,
+      name: 'punto' + this.id.toString()
     });
+  }
+
+  puntoAzulBuscarCercania(left: number, top: number): fabric.Circle | undefined {
+    const punto = this.crearPuntoAzul(left, top);
+
+    const cercaniaCodo = this.buscarCodoEnCercania(punto.left!, punto.top!);  //! DEVUELVE EL CODO ANTERIOR YA QUE EL SIGUIENTE TODAVÍA NO LO HEMOS CREADO
+    //console.log(cercaniaCodo)
+    // Si existe un codo en la cercanía, no se crea un nuevo punto de control
+    if (cercaniaCodo) {
+      return undefined;
+    }
+    return punto;
+  }
+
+
+  buscarCodoEnCercania(x: number, y: number): fabric.Circle | undefined {
+    const tolerancia = 20; // Definir la distancia de tolerancia para considerar cercanía
+
+    // Verificar la cercanía con los codos existentes
+    for (const map of this.lineCodoMaps) {
+      for (const codo of map.codo) {
+        const codoX = codo.left!;
+        const codoY = codo.top!;
+
+        // Calcular la distancia entre el punto y el codo utilizando la función distanciaEntrePuntos
+        const distancia = this.distanciaEntrePuntos({ x: codoX, y: codoY }, { x, y });
+        //console.log(distancia)
+
+        // Verificar si la distancia es menor o igual que la tolerancia
+        if (distancia <= tolerancia) {
+          return codo;
+        }
+      }
+    }
+
+    // Verificar la cercanía con los puntos azules existentes
+    for (const map of this.lineCodoMaps) {
+      for (const punto of map.puntos) {
+
+        const puntoX = punto.left!;
+        const puntoY = punto.top!;
+
+        // Calcular la distancia entre el punto y el punto azul existente
+        const distanciaPunto = this.distanciaEntrePuntos({ x: puntoX, y: puntoY }, { x, y });
+
+
+        // Verificar si el punto está cerca de un punto azul existente
+        if (distanciaPunto <= tolerancia) {
+          return punto; // Ya existe un punto azul cercano, no se crea otro
+        }
+      }
+    }
+
+    return undefined;
+  }
+
+  //Visualizar por consola el almacen para ver su estado
+  devolverAlmacen() {
+    console.log(this.lineCodoMaps)
   }
 }

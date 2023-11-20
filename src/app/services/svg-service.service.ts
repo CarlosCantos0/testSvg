@@ -4,7 +4,7 @@ import { SvgBase } from '../interfaces/svgBase.interface';
 @Injectable({
   providedIn: 'root'
 })
-export class SvgServiceService {
+export class SvgService {
 
   id: number = 0;
 
@@ -14,15 +14,15 @@ export class SvgServiceService {
   private elementosAlmacen: SvgBase[] = [
     {
       svgContent: '',
-      id: this.id++,
-      forma: 'cuadrado-rectangulo',
-      coordX: 50,
-      coordY: 50,
-      width: 100,
-      height: 100,
-      stroke: 'red',
-      rellenado: false,
-      fill: '',
+      id: this.id++,                //Identificador único
+      forma: 'cuadrado-rectangulo', //Tipo de forma para diferenciar del resto
+      coordX: 50,                   //coordenada X en el lienzo
+      coordY: 50,                   //Coordenada Y en el lienzo
+      width: 100,                   // Ancho del cuadrado-rectangulo
+      height: 100,                  //Alto del cuadrado-rectangulo
+      stroke: 'red',                //Color del borde
+      rellenado: false,             //si queremos rellenado o no
+      fill: '',                     //Color relleno
       strokeWidth: NaN,
       sizeLetter: NaN,
       text: '',
@@ -53,46 +53,46 @@ export class SvgServiceService {
       y2: NaN
     },
     {
-      svgContent: '', // Deja este campo vacío o como prefieras para las líneas
-      id: this.id++, // Un nuevo ID para la línea
-      forma: 'linea', // Marca como 'linea' para diferenciarlo de otros elementos
-      coordX: 150,
-      coordY: 250,
+      svgContent: '',
+      id: this.id++,
+      forma: 'linea',           // Marca como 'linea' para diferenciarlo de otros elementos
+      coordX: NaN,
+      coordY: NaN,
       width: NaN,
       height: NaN,
       stroke: '#0a0a0a',
       rellenado: false,
-      fill: '#0a0a0a',
+      fill: '',
       strokeWidth: 3,
       sizeLetter: 0,
       text: '',
       fonts: '',
-      x1: 100, // Coordenada inicial X
-      y1: 100, // Coordenada inicial Y
-      x2: 200, // Coordenada final X
-      y2: 200, // Coordenada final Y
+      x1: 100,                  // Coordenada inicial X
+      y1: 100,                  // Coordenada inicial Y
+      x2: 200,                  // Coordenada final X
+      y2: 200,                  // Coordenada final Y
     },
     {
-      svgContent: '', // Deja este campo vacío o como prefieras para el objeto de texto
-      forma: 'texto', // Marca como 'texto' para diferenciarlo de otros elementos
-      id: this.id++, // Un nuevo ID para el objeto de texto
-      coordX: 200, // Coordenada X
-      coordY: 100, // Coordenada Y
+      svgContent: '',
+      forma: 'texto',
+      id: this.id++,
+      coordX: 200,              // Coordenada X en el lienzo
+      coordY: 100,              // Coordenada Y lienzo
       width: NaN,
       height: NaN,
-      stroke: '',
+      stroke: '',               //Color borde del texto
       rellenado: false,
       strokeWidth: NaN,
       sizeLetter: 30,
-      text: 'Texto de ejemplo', // El texto que deseas mostrar
-      fonts: 'monospace', // Tipo de fuente
-      fill: 'black', // Color del texto
-      x1: NaN, // Coordenada inicial X
-      y1: NaN, // Coordenada inicial Y
-      x2: NaN, // Coordenada final X
-      y2: NaN, // Coordenada final Y
+      text: 'Texto de ejemplo', // El texto a mostrar
+      fonts: 'monospace',       // Tipos de fuentes
+      fill: 'black',            // Color relleno texto
+      x1: NaN,
+      y1: NaN,
+      x2: NaN,
+      y2: NaN,
     }
-  ];  //Almacen compartido con el componente para realizar la descarga y vistaPrevia
+  ];  //Almacen compartido con el componente Dashboard para realizar el SVG y la vistaPrevia en el Canvas
 
   // Obtiene las formas almacenadas para editarlas posteriormente y realizar la descarga
   getElementosAlmacenados(): SvgBase[] {

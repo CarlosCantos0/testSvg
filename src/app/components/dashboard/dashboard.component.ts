@@ -1,6 +1,6 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { SvgBase } from 'src/app/interfaces/svgBase.interface';
-import { SvgServiceService } from 'src/app/services/svg-service.service';
+import { SvgService } from 'src/app/services/svg-service.service';
 
 @Component({
   selector: 'app-dashboard',
@@ -9,8 +9,10 @@ import { SvgServiceService } from 'src/app/services/svg-service.service';
 })
 export class DashboardComponent implements OnInit{
 
-  private svgService = inject(SvgServiceService)
-  public elementosAlmacen: SvgBase[] = [];  //Almacen compartido con el componente para realizar la descarga y vistaPrevia
+  //constructor(private svgService: SvgServiceService){}
+
+  private svgService = inject(SvgService)
+  public elementosAlmacen: SvgBase[] = [];  //Almacen recibido del servicio svg-service
 
 
   ngOnInit(): void {

@@ -10,8 +10,6 @@ import { CanvasService } from './canvas.service';
 })
 export class FiguraService {
 
-  num: number = 1;
-
   private canvas: fabric.Canvas | undefined;
   objetoSeleccionado: fabric.Object | undefined;
   codoMode: boolean = true;
@@ -32,8 +30,6 @@ export class FiguraService {
       stroke: figura.stroke,
       name: figura.id.toString(),
       opacity: 0.65,
-
-      // Otras propiedades específicas del rectángulo...
     });
 
 
@@ -55,7 +51,6 @@ export class FiguraService {
       fill: figura.fill,
       stroke: figura.stroke,
       name: figura.id.toString(),
-      // Otras propiedades específicas del texto...
     });
 
     this.canvas!.bringToFront(this.objetoSeleccionado!)
@@ -70,16 +65,13 @@ export class FiguraService {
   crearLinea(figura: SvgBase): fabric.Line {
     const linea = new fabric.Line([figura.x1, figura.y1, figura.x2, figura.y2], {
       stroke: figura.stroke,
-      fill: figura.stroke,
+      fill: figura.fill,
       strokeWidth: figura.strokeWidth,
       name: figura.id.toString(),
       opacity: 0.85,
     });
 
     this.canvas!.sendBackwards(this.objetoSeleccionado!);
-    if (this.codoMode) {
-      this.habilitarCodoCreation(linea as fabric.Line);
-    }
 
     linea.on('mousedown', (options) => {
       this.seleccionarFigura(options.target!);
@@ -91,34 +83,24 @@ export class FiguraService {
 
     this.canvas!.on('mouse:dblclick', (event) => {
       if (this.codoMode && event.target instanceof fabric.Line) {
-        this.codoService.crearCodo(event.target as fabric.Line, this.canvas!.getPointer(event.e));
+        this.codoService.realizarCodoYLineas(event.target as fabric.Line, this.canvas!.getPointer(event.e));
         this.canvas!.remove(event.target);
       }
     });
+
 
     return linea;
   }
 
   seleccionarFigura(figura: fabric.Object): fabric.Object {
-    // console.log('seleccionar figuura')
     return this.objetoSeleccionado = figura;
   }
 
   editarTexto(objetoTexto: fabric.Text) {
-    // Abre un cuadro de diálogo de entrada de texto y permite al usuario editar el texto
     const nuevoTexto = prompt('Editar texto:', objetoTexto.text);
     if (nuevoTexto !== null) {
       objetoTexto.set({ text: nuevoTexto });
-      this.canvas?.renderAll(); // Actualiza el lienzo para reflejar los cambios
+      this.canvas?.renderAll(); //Actualiza el lienzo para refrescar las modificaciones
     }
-  }
-
-  habilitarCodoCreation(linea: fabric.Line) {
-    linea.on('mouse:dblclick', (options) => {
-      if (this.codoMode && options.target instanceof fabric.Line) {
-        console.log('dentro de codo creation')
-        this.codoService.crearCodo(options.target as fabric.Line, this.canvas!.getPointer(options.e));
-      }
-    });
   }
 }

@@ -7,7 +7,7 @@ import { DashboardComponent } from './components/dashboard/dashboard.component';
 import { VistaPreviaComponent } from './components/vista-previa/vista-previa.component';
 import { FiguraService } from './services/figura.service';
 import { CodoService } from './services/codo.service';
-import { SvgServiceService } from './services/svg-service.service';
+import { SvgService } from './services/svg-service.service';
 import { CanvasService } from './services/canvas.service';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import {MatMenuModule} from '@angular/material/menu';
@@ -27,7 +27,7 @@ import {MatMenuModule} from '@angular/material/menu';
   providers: [
     FiguraService,
     CodoService,
-    SvgServiceService,
+    SvgService,
     CanvasService
   ],
   bootstrap: [AppComponent]
