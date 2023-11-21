@@ -86,8 +86,6 @@ export class VistaPreviaComponent implements OnInit {
 
   //Devolvemos el almacen por el console.log para ver si se actualizan bien los datos
   devolverAlmacen() {
-    this.codoService.devolverAlmacen();
-    this.codoService.devolverConexionMap();
     this.codoService.devolverMapa();
   }
 
