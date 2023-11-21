@@ -32,7 +32,7 @@ export class CanvasService {
     this.figuraService.inicializar(this);
     this.codoService.inicializar(this.canvas);
 
-    this.movimiento();
+    this.seleccion();
     this.figuras = this.getFigurasAlmacen();
     return this.canvas;
   }
@@ -48,7 +48,7 @@ export class CanvasService {
    return this.figuras = this.svg.getElementosAlmacenados();
   }
 
-  movimiento() {
+  seleccion() {
     if (this.canvas) {
       //Evento cada vez que dejo de clickar
       this.canvas.on('mouse:down', (event) => {

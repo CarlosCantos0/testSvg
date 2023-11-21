@@ -1,0 +1,32 @@
+.contenedor {
+  position: relative;
+}
+
+.figuras-list {
+  position: absolute !important;
+  top: -750px !important;
+  right: 50px !important;
+  padding: 10px;
+  border: 1px solid #ccc;
+}
+
+.propiedades-figura {
+  position: absolute !important;
+  top: -500px !important;
+  right: 50px !important;
+  background-color: #fff;
+  padding: 10px;
+  border: 1px solid #ccc;
+}
+
+.tamaño-boton {
+  font-size: 20px; /* Ajusta el tamaño de la fuente */
+  padding: 15px 30px;
+  margin-left: 10px;
+}
+
+.tamaño-lista {
+  font-size: 13px; /* Ajusta el tamaño de la fuente */
+  padding: 10px 15px;
+  margin-top: 3px;
+}

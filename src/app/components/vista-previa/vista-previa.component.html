@@ -9,29 +9,33 @@
 <br>
 
 
-<button (click)="exportarSVG()">Guardar SVG</button>
-<button (click)="devolverAlmacen()">Console del almacen</button>
+<button class="tamaño-boton" (click)="exportarSVG()">Guardar SVG</button>
+<button class="tamaño-boton" (click)="devolverAlmacen()">Console del almacen</button>
 
-<div class="figuras-list">
-  <ul>
-    <li *ngFor="let figura of figuras; let i = index" (click)="seleccionarFiguraLista(figura!)">
-      <button>Forma {{ figura.forma + ' ' + i }}</button>
-    </li>
-  </ul>
-</div>
+<div class="contenedor">
+  <div class="figuras-list">
+    <ul>
+      <li *ngFor="let figura of figuras; let i = index" (click)="seleccionarFiguraLista(figura!)">
+        <button class="tamaño-lista">Forma {{ figura.forma + ' ' + i }}</button>
+      </li>
+    </ul>
+  </div>
 
 
 
-<div class="propiedades-figura" *ngIf="objetoSeleccionado">
-  <div *ngIf="esLinea(objetoSeleccionado)">
-    <label for="color">Selecciona el color de relleno: </label>
-    <input type="color" id="color" [value]="objetoSeleccionado!.fill" (change)="actualizarColor($event)" />
-    </div>
+  <div class="propiedades-figura" *ngIf="objetoSeleccionado">
+    <div *ngIf="esLinea(objetoSeleccionado)">
+      <label for="color">Selecciona el color de relleno: </label>
+      <input type="color" id="color" [value]="objetoSeleccionado!.fill" (change)="actualizarColor($event)" />
+      </div>
+      <br>
+      <label for="color">Selecciona el color del borde: </label>
+      <input type="color" id="color" [value]="objetoSeleccionado!.stroke" (change)="actualizarColorBorde($event)" />
+
     <br>
-    <label for="color">Selecciona el color del borde: </label>
-    <input type="color" id="color" [value]="objetoSeleccionado!.stroke" (change)="actualizarColorBorde($event)" />
-
-  <p>Figura Seleccionada: {{ objetoSeleccionado }}</p>
-  <p>Coordenada X: {{ objetoSeleccionado.left }}</p>
-  <p>Coordenada Y: {{ objetoSeleccionado.top }}</p>
+    <br>
+    <p>Tipo de figura = {{ objetoSeleccionado.type }}</p>
+    <p>Coordenada X = {{ objetoSeleccionado.left }}</p>
+    <p>Coordenada Y = {{ objetoSeleccionado.top }}</p>
+  </div>
 </div>

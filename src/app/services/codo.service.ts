@@ -1,4 +1,4 @@
-import { EventEmitter, Injectable, inject } from '@angular/core';
+import { Injectable } from '@angular/core';
 import { fabric } from 'fabric';
 import { LineCodoMap } from '../components/vista-previa/vista-previa.component';
 
@@ -9,12 +9,6 @@ interface lineaParams {
   codo: fabric.Circle;
   punto1?: fabric.Circle;
   punto2?: fabric.Circle;
-}
-
-interface LineHandler {
-  line: fabric.Line;
-  startElement: fabric.Circle;
-  endElement: fabric.Circle;
 }
 
 interface CodoData {
@@ -35,7 +29,6 @@ export class CodoService {
 
   private canvas: fabric.Canvas | undefined;
   private lineCodoMaps: LineCodoMap[] = [];
-//  private lineaConexion: LineHandler[] = [];
 
   private codosData: Map<fabric.Circle, CodoData[]> = new Map();
 
@@ -58,9 +51,6 @@ export class CodoService {
       //console.log(map.lines)
     }
 
-    // Eliminar la referencia de la línea en lineaConexion
-    //this.lineaConexion = this.lineaConexion.filter(entry => entry.line !== linea);
-
     // Eliminar la referencia de la línea en codosData
     this.codosData.forEach((codosData, codo) => {
       codosData.forEach(codoData => {
@@ -73,23 +63,12 @@ export class CodoService {
 
   }
 
-  // Agregar las líneas asociadas a un codo al mapa
-  private agregarPuntosLinea(linea: fabric.Line, puntoInicio: fabric.Circle, puntoFinal: fabric.Circle): void {
-    //this.lineaConexion.push({ line: linea, startElement: puntoInicio, endElement: puntoFinal });
-    //console.log(this.lineaConexion);
-  }
-
-  devolverConexionMap() {
-    //console.log(this.lineaConexion);
-  }
-
   realizarCodoYLineas(linea: fabric.Line, pointer: { x: number, y: number }) {
     const { x1, y1, x2, y2 } = linea;
 
     const codo = this.crearCodo(pointer);
-
-
     this.canvas!.bringToFront(codo);
+
     const codoPosition = codo.getCenterPoint();
 
     const puntoA: Punto = { x: x2!, y: y2!, id: 'Punto' + this.id.toString() };
@@ -116,7 +95,7 @@ export class CodoService {
     return new fabric.Circle({
       left: pointer.x,
       top: pointer.y,
-      radius: 10,
+      radius: 12,
       fill: 'red',
       hasBorders: false,
       hasControls: false,
@@ -128,6 +107,9 @@ export class CodoService {
     const { x1, y1, x2, y2 } = linea;
     const nuevaLinea1 = this.crearNuevaLinea([x1!, y1!, codoPosition.x, codoPosition.y], linea.stroke!, linea.strokeWidth!);
     const nuevaLinea2 = this.crearNuevaLinea([codoPosition.x, codoPosition.y, x2!, y2!], linea.stroke!, linea.strokeWidth!);
+    this.canvas!.sendBackwards(nuevaLinea1);
+    this.canvas!.sendBackwards(nuevaLinea2);
+
     return [nuevaLinea1, nuevaLinea2];
   }
 
@@ -135,15 +117,9 @@ export class CodoService {
     const { codo, linea1, linea2, punto1, punto2 } = params;
     if (punto1 === undefined || punto2 === undefined) {
       this.canvas!.add(codo, linea1, linea2);
-    } else if (punto2 === undefined) {
-      this.canvas!.add(codo, linea1, linea2, punto1);
-    } else if (punto1 === undefined) {
-      this.canvas!.add(codo, linea1, linea2, linea2)
     } else {
       this.canvas!.add(codo, linea1, linea2, punto1!, punto2!);
     }
-    this.agregarPuntosLinea(linea1, codo, punto1!); //COMPORTAMIENTO DE LAS LINEAS AL SEGUIR AL CODO
-    this.agregarPuntosLinea(linea2, punto2!, codo);
   }
 
   private crearNuevaLinea(points: number[], stroke: string, strokeWidth: number): fabric.Line {
@@ -155,7 +131,7 @@ export class CodoService {
     });
   }
 
-  actualizarLineCodoMap(params: lineaParams): void {
+  actualizarLineCodoMap(params: lineaParams): void {    //! TODO refactorizar y separar métodos
     const { lineaOriginal: linea, linea1, linea2, codo, punto1, punto2 } = params;
 
     this.eliminarLineaDelCanvas(linea!);
@@ -212,7 +188,6 @@ export class CodoService {
       }]);
     }
   }
-
   private getLineCodoMap(params: lineaParams): LineCodoMap[] {
     // Accede a los parámetros mediante el objeto params
     const { linea1, linea2, codo, punto1, punto2 } = params;

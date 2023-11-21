@@ -17,7 +17,6 @@ export interface LineCodoMap {
   selector: 'app-vista-previa',
   templateUrl: './vista-previa.component.html',
   styleUrls: ['./vista-previa.component.css'],
-
 })
 export class VistaPreviaComponent implements OnInit {
 
@@ -107,7 +106,7 @@ export class VistaPreviaComponent implements OnInit {
   actualizarColor(event: any) {
     if (this.canvas) {
       if (this.objetoSeleccionado) {
-        this.objetoSeleccionado.fill = event.target;
+        this.objetoSeleccionado.fill = event.target.value;
         this.forzarActualizacionColor(this.objetoSeleccionado);
       }
     }
@@ -131,7 +130,7 @@ export class VistaPreviaComponent implements OnInit {
   }
 
   actualizarFigura(event: any) {
-    this.objetoSeleccionado = event.target;
+    this.objetoSeleccionado = event.target.value;
   }
 
   exportarSVG() {

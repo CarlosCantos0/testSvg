@@ -100,19 +100,19 @@ export class SvgService {
   }
 
   // Método para generar contenido SVG basado en la forma seleccionada y sus propiedades
-  updateSvgContent(svg: SvgBase): string {
-    let svgContent = '';
+  // updateSvgContent(svg: SvgBase): string {
+  //   let svgContent = '';
 
-    if (svg.forma === 'cuadrado-rectangulo') {
-      const CuadradoRectangulo = svg;
-      let fillAttribute = CuadradoRectangulo.rellenado ? CuadradoRectangulo.stroke : 'none';
+  //   if (svg.forma === 'cuadrado-rectangulo') {
+  //     const CuadradoRectangulo = svg;
+  //     let fillAttribute = CuadradoRectangulo.rellenado ? CuadradoRectangulo.stroke : 'none';
 
-      svgContent = `<g id="figura-${svg.id}"><rect id="${CuadradoRectangulo.id}" x="${CuadradoRectangulo.coordX}" y="${CuadradoRectangulo.coordY}" width="${CuadradoRectangulo.width}" height="${CuadradoRectangulo.height}" fill="${fillAttribute}" stroke="${CuadradoRectangulo.stroke}"`;
-      svgContent += ' /></g>';
-    }
+  //     svgContent = `<g id="figura-${svg.id}"><rect id="${CuadradoRectangulo.id}" x="${CuadradoRectangulo.coordX}" y="${CuadradoRectangulo.coordY}" width="${CuadradoRectangulo.width}" height="${CuadradoRectangulo.height}" fill="${fillAttribute}" stroke="${CuadradoRectangulo.stroke}"`;
+  //     svgContent += ' /></g>';
+  //   }
 
-    svg.svgContent = svgContent;
-    return svgContent;
-  }
+  //   svg.svgContent = svgContent;
+  //   return svgContent;
+  // }
 
 }
