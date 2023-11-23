@@ -1,6 +1,6 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { SvgBase } from 'src/app/interfaces/svgBase.interface';
-import { SvgService } from 'src/app/services/svg-service.service';
+import { DataService } from 'src/app/services/data.service';
 
 @Component({
   selector: 'app-dashboard',
@@ -9,9 +9,8 @@ import { SvgService } from 'src/app/services/svg-service.service';
 })
 export class DashboardComponent implements OnInit{
 
-  //constructor(private svgService: SvgServiceService){}
+  constructor(private dataService: DataService){}
 
-  private svgService = inject(SvgService)
   public elementosAlmacen: SvgBase[] = [];  //Almacen recibido del servicio svg-service
 
 
@@ -20,6 +19,10 @@ export class DashboardComponent implements OnInit{
   }
 
   getElementosAlmacen() {
-    this.elementosAlmacen = this.svgService.getElementosAlmacenados();
+    const elementosAlmacen = this.dataService.leerLayout()
+      .then(data => {
+        this.elementosAlmacen = data;
+        console.log(this.elementosAlmacen); // Aquí puedes trabajar con los datos obtenidos
+      })
   }
 }

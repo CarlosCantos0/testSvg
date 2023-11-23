@@ -2,6 +2,12 @@
   position: relative;
 }
 
+ul {
+  list-style: decimal-leading-zero;
+  padding: 5;
+  margin: 5;
+}
+
 .figuras-list {
   position: absolute !important;
   top: -750px !important;

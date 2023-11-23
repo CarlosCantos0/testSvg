@@ -2,8 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { FiguraService } from './figura.service';
 import { CodoService } from './codo.service';
 import { fabric } from 'fabric';
-import { SvgBase } from '../interfaces/svgBase.interface';
-import { SvgService } from './svg-service.service';
+import { DataService } from './data.service';
 
 
 @Injectable({
@@ -12,12 +11,8 @@ import { SvgService } from './svg-service.service';
 export class CanvasService {
 
   private canvas: fabric.Canvas | undefined;
-  private objetoSeleccionado: fabric.Object | undefined;
-  private figuras: SvgBase[] = [];
 
-
-  constructor( private svg: SvgService, private figuraService: FiguraService, private codoService: CodoService) {}
-
+  constructor( private figuraService: FiguraService, private codoService: CodoService, private data: DataService) {}
 
   inicializarCanvas(): fabric.Canvas {
     this.canvas = new fabric.Canvas('canvas', {
@@ -32,8 +27,6 @@ export class CanvasService {
     this.figuraService.inicializar(this);
     this.codoService.inicializar(this.canvas);
 
-    this.seleccion();
-    this.figuras = this.getFigurasAlmacen();
     return this.canvas;
   }
 
@@ -44,22 +37,5 @@ export class CanvasService {
     return this.canvas;
   }
 
-  getFigurasAlmacen():SvgBase[] {
-   return this.figuras = this.svg.getElementosAlmacenados();
-  }
 
-  seleccion() {
-    if (this.canvas) {
-      //Evento cada vez que dejo de clickar
-      this.canvas.on('mouse:down', (event) => {
-        if (event.target) {
-          this.seleccionObjeto(event);
-        }
-      });
-    }
-  }
-
-  seleccionObjeto(event: any) {
-    this.objetoSeleccionado = event.target;
-  }
 }

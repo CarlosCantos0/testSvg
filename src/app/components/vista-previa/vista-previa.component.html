@@ -11,12 +11,14 @@
 
 <button class="tamaño-boton" (click)="exportarSVG()">Guardar SVG</button>
 <button class="tamaño-boton" (click)="devolverAlmacen()">Console del almacen</button>
+<button class="tamaño-boton" (click)="cargar()">Refrescar datos</button>
+<button class="tamaño-boton" (click)="devolverAlmacenTiempoReal()">Almacen Tiempo Real</button>
 
 <div class="contenedor">
   <div class="figuras-list">
     <ul>
       <li *ngFor="let figura of figuras; let i = index" (click)="seleccionarFiguraLista(figura!)">
-        <button class="tamaño-lista">Forma {{ figura.forma + ' ' + i }}</button>
+        <button class="tamaño-lista">Forma {{ figura.forma + ' ' + ( i + 1)}}</button>
       </li>
     </ul>
   </div>

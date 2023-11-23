@@ -3,9 +3,10 @@ import { fabric } from 'fabric';
 import { SvgBase } from 'src/app/interfaces/svgBase.interface';
 import { CodoService } from 'src/app/services/codo.service';
 import { FiguraService } from 'src/app/services/figura.service';
-import { SvgService } from 'src/app/services/svg-service.service';
 import { CanvasService } from '../../services/canvas.service';
 import { MatMenuTrigger } from '@angular/material/menu';
+import { DataService } from 'src/app/services/data.service';
+import { IpersistenciaSvg } from 'src/app/interfaces/ipersistencia-svg'
 
 export interface LineCodoMap {
   lines: fabric.Line[];     // Array que almacena las dos líneas
@@ -36,24 +37,46 @@ export class VistaPreviaComponent implements OnInit {
   codoMode: boolean = true; // Modo de creación de codos
   inputColorLinea: boolean = true;
 
-  constructor(private svg: SvgService, private figuraService: FiguraService, private codoService: CodoService, private canvasService: CanvasService) { }
-
+  constructor(private dataService: DataService, private figuraService: FiguraService, private codoService: CodoService, private canvasService: CanvasService) { }
 
   ngOnInit(): void {
+    this.actualizarDatos();
+    this.cargar();
+  }
+
+  cargar() {
     this.canvas = this.canvasService.inicializarCanvas();
-    // Obtiene las figuras del servicio
+    this.canvas.renderAll();
     this.filtrarFigurasAñadirCanvas();
   }
 
 
   // Función para dibujar las figuras en el canvas
   private filtrarFigurasAñadirCanvas() {
+    setTimeout(() => {
+      this.figuras = this.actualizarDatos()
+      //console.log(this.figuras)
+      this.canvas!.clear()
+      this.figurasAlmacen(this.figuras);
+    }, 3000) // Espera hasta que el almacen se llene en actualizarDatos()
+    console.log(this.figuras)
+  }
 
-    this.figuras = this.canvasService.getFigurasAlmacen();
+  actualizarDatos(): SvgBase[] {
+    setInterval(() => {
+      this.dataService.leerLayout().then(data => {
+        this.figuras = data
+        return this.figuras;
+      });
+    }, 2500);
+    return this.figuras;
+  }
 
-    this.figuras.forEach((figura) => {
-      let objetoCanva: fabric.Object | undefined;
+  figurasAlmacen(figuras: SvgBase[]) {
+    let objetoCanva: fabric.Object | undefined;
+    console.log(figuras)
 
+    figuras.forEach((figura) => {
       if (figura.forma === 'cuadrado-rectangulo') {
         objetoCanva = this.figuraService.crearRectangulo(figura);
       } else if (figura.forma === 'texto') {
@@ -65,13 +88,36 @@ export class VistaPreviaComponent implements OnInit {
       if (objetoCanva) {
         this.canvas!.add(objetoCanva);
         objetoCanva.on('mousedown', (event: any) => {
-          this.objetoSeleccionado = objetoCanva;
+          this.objetoSeleccionado = event.target;
         });
       }
+    });
 
-      this.canvas!.on('selection:cleared', () => {
-        this.objetoSeleccionado = undefined; // Cuando se deselecciona, ObjetoSeleccionado es null
-      });
+    this.canvas!.on('object:modified', (event: any) => {
+      const modifiedObject = event.target; // Objeto modificado en el canvas
+      // Obtener los datos actualizados del objeto
+      const updatedData: SvgBase[] = [{
+        id: modifiedObject.name,
+        coordX: modifiedObject.left,
+        coordY: modifiedObject.top,
+        height: modifiedObject.height,
+        width: modifiedObject.width,
+        text: modifiedObject.text,
+
+        x1: modifiedObject.left,
+        y1: modifiedObject.top,
+        x2: modifiedObject.x2,
+        y2: modifiedObject.y2
+      } as SvgBase];
+      console.log(updatedData)
+
+      // Notificar al servicio de eventos sobre la actualización de datos
+      this.dataService.actualizacionDatosSubject.next(updatedData);
+    });
+
+    this.canvas!.on('selection:cleared', () => {
+      console.log('limpio')
+      this.objetoSeleccionado = undefined; // Cuando se deselecciona, ObjetoSeleccionado es null
     });
   }
 
@@ -86,6 +132,16 @@ export class VistaPreviaComponent implements OnInit {
   //Devolvemos el almacen por el console.log para ver si se actualizan bien los datos
   devolverAlmacen() {
     this.codoService.devolverMapa();
+    this.codoService.devolverAlmacen();
+    this.dataService.devolverAlmacen();
+  }
+
+  devolverAlmacenTiempoReal() {
+    this.dataService.leerTiempoReal();
+    setInterval(() => {
+      this.filtrarFigurasAñadirCanvas();
+      this.canvas!.renderAll;
+    }, 4000);
   }
 
   //Busca por ID el objeto que seleccionamos de la lista para mostrarlo activo
@@ -134,6 +190,9 @@ export class VistaPreviaComponent implements OnInit {
   }
 
   exportarSVG() {
+    console.log(this.figuras);
+    this.dataService.guardarSvg(this.figuras);
+
     // Crear un nuevo elemento canvas temporal para la exportación
     if (this.canvas) {
       const tempCanvas = document.createElement('canvas');
