@@ -22,7 +22,7 @@ export class DashboardComponent implements OnInit{
     const elementosAlmacen = this.dataService.leerLayout()
       .then(data => {
         this.elementosAlmacen = data;
-        console.log(this.elementosAlmacen); // Aquí puedes trabajar con los datos obtenidos
+        //console.log(this.elementosAlmacen); // Aquí puedes trabajar con los datos obtenidos
       })
   }
 }

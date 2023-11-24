@@ -6,7 +6,7 @@ import { FiguraService } from 'src/app/services/figura.service';
 import { CanvasService } from '../../services/canvas.service';
 import { MatMenuTrigger } from '@angular/material/menu';
 import { DataService } from 'src/app/services/data.service';
-import { IpersistenciaSvg } from 'src/app/interfaces/ipersistencia-svg'
+import { Subscription } from 'rxjs';
 
 export interface LineCodoMap {
   lines: fabric.Line[];     // Array que almacena las dos líneas
@@ -22,6 +22,12 @@ export interface LineCodoMap {
 export class VistaPreviaComponent implements OnInit {
 
   @ViewChild(MatMenuTrigger) contextMenu!: MatMenuTrigger;
+
+  @ViewChild('nuevoTexto') nuevoTextoRef!: ElementRef;
+
+  interval: any;
+
+  private datosSubscription: Subscription | undefined;
 
   lineCodoMaps: LineCodoMap[] = [];
   movingBluePoint: boolean = false;
@@ -52,49 +58,78 @@ export class VistaPreviaComponent implements OnInit {
 
 
   // Función para dibujar las figuras en el canvas
-  private filtrarFigurasAñadirCanvas() {
-    setTimeout(() => {
-      this.figuras = this.actualizarDatos()
-      //console.log(this.figuras)
-      this.canvas!.clear()
-      this.figurasAlmacen(this.figuras);
-    }, 3000) // Espera hasta que el almacen se llene en actualizarDatos()
-    console.log(this.figuras)
+  private async filtrarFigurasAñadirCanvas() {
+    await this.actualizarDatos();
+    this.canvas!.clear()
+    this.figurasAlmacen(this.figuras);
+    //console.log(this.figuras)
   }
 
-  actualizarDatos(): SvgBase[] {
-    setInterval(() => {
-      this.dataService.leerLayout().then(data => {
-        this.figuras = data
-        return this.figuras;
-      });
-    }, 2500);
-    return this.figuras;
+  async actualizarDatos(): Promise<void> {
+    return new Promise<void>((resolve) => {
+      setTimeout(async () => {
+        const data = await this.dataService.leerLayout();
+        this.figuras = data;
+        resolve();
+      }, 500);
+    });
   }
 
   figurasAlmacen(figuras: SvgBase[]) {
-    let objetoCanva: fabric.Object | undefined;
-    console.log(figuras)
-
     figuras.forEach((figura) => {
-      if (figura.forma === 'cuadrado-rectangulo') {
-        objetoCanva = this.figuraService.crearRectangulo(figura);
-      } else if (figura.forma === 'texto') {
-        objetoCanva = this.figuraService.crearTexto(figura);
-      } else if (figura.forma === 'linea') {
-        objetoCanva = this.figuraService.crearLinea(figura);
-      }
-
+      const objetoCanva = this.crearObjetoFabric(figura);
       if (objetoCanva) {
-        this.canvas!.add(objetoCanva);
-        objetoCanva.on('mousedown', (event: any) => {
-          this.objetoSeleccionado = event.target;
-        });
+        this.agregarObjetoAlCanvas(objetoCanva);
+        this.vincularEventoMouseDown(objetoCanva);
       }
     });
 
+    this.registrarEventoModificacion();
+    this.registrarSuscripcionDatos();
+    this.registrarEventoLimpiarSeleccion();
+  }
+
+  crearObjetoFabric(figura: SvgBase): fabric.Object | undefined {
+    let objetoCanva: fabric.Object | undefined;
+
+    switch (figura.forma) {
+      case 'rect':
+        objetoCanva = this.figuraService.crearRectangulo(figura);
+        break;
+      case 'text':
+        objetoCanva = this.figuraService.crearTexto(figura);
+        break;
+      case 'line':
+        objetoCanva = this.figuraService.crearLinea(figura);
+        break;
+      default:
+        break;
+    }
+
+    return objetoCanva;
+  }
+
+  agregarObjetoAlCanvas(objetoCanva: fabric.Object) {
+    this.canvas!.add(objetoCanva);
+  }
+
+  vincularEventoMouseDown(objetoCanva: fabric.Object) {
+    objetoCanva.on('mousedown', (event: any) => {
+      this.objetoSeleccionado = event.target;
+    });
+  }
+
+  registrarEventoModificacion() {
     this.canvas!.on('object:modified', (event: any) => {
       const modifiedObject = event.target; // Objeto modificado en el canvas
+      //console.log(event.target)
+      if(modifiedObject instanceof fabric.Line) {
+        console.log(modifiedObject.x2, modifiedObject.y2)
+      }
+
+      //Coordenadas pero de la caja no de la linea
+      const coords = modifiedObject.lineCoords;
+
       // Obtener los datos actualizados del objeto
       const updatedData: SvgBase[] = [{
         id: modifiedObject.name,
@@ -104,21 +139,45 @@ export class VistaPreviaComponent implements OnInit {
         width: modifiedObject.width,
         text: modifiedObject.text,
 
-        x1: modifiedObject.left,
-        y1: modifiedObject.top,
-        x2: modifiedObject.x2,
-        y2: modifiedObject.y2
+        x1: coords.tl.x,    //Le asignamos las coordenadas de la caja porque en el evento no obtenemos las
+        y1: coords.tl.y,    //coordenadas de la linea en si al modificarse
+        x2: coords.br.x,
+        y2: coords.br.y,
+
+        forma: modifiedObject.type,
       } as SvgBase];
-      console.log(updatedData)
-
+      //console.log(updatedData)
+      this.forzarActualizacion(modifiedObject)
       // Notificar al servicio de eventos sobre la actualización de datos
-      this.dataService.actualizacionDatosSubject.next(updatedData);
+      this.dataService.actualizacionDatosSubject.next(updatedData)
     });
+  }
 
+  registrarSuscripcionDatos() {
+    this.datosSubscription = this.dataService.actualizacionDatosSubject.subscribe(
+      (datosActualizados: SvgBase[]) => {
+        datosActualizados.forEach((updatedItem: SvgBase) => {
+          const index = this.figuras.findIndex(item => item.id == updatedItem.id);
+          if (index !== -1) {
+            this.figuras[index] = updatedItem;
+          } else {
+            this.figuras.push(updatedItem);
+          }
+        });
+      }
+    );
+  }
+
+  registrarEventoLimpiarSeleccion() {
     this.canvas!.on('selection:cleared', () => {
-      console.log('limpio')
-      this.objetoSeleccionado = undefined; // Cuando se deselecciona, ObjetoSeleccionado es null
+      this.objetoSeleccionado = undefined;
     });
+  }
+
+  forzarActualizacion(objetoModificado: fabric.Text) {
+    objetoModificado.scaleX! *= 0.9999999;
+    objetoModificado.scaleY! *= 0.9999999;
+    this.canvas!.renderAll();
   }
 
   //Context menu para llevar al frente o al fondo a la FiguraSVG
@@ -137,11 +196,15 @@ export class VistaPreviaComponent implements OnInit {
   }
 
   devolverAlmacenTiempoReal() {
-    this.dataService.leerTiempoReal();
-    setInterval(() => {
-      this.filtrarFigurasAñadirCanvas();
-      this.canvas!.renderAll;
+    this.dataService.leerTiempoReal();  //!TO DO: función en el servicio para dejar de modificar info
+    this.interval = setInterval(() => {
+      this.filtrarFigurasAñadirCanvas();  //Entramos al filtro de las figuras para tener el canvas
+      this.canvas!.renderAll;             //actualizado con los valores que modificamos arriba
     }, 4000);
+  }
+
+  limpiaInterval() {
+    if(this.interval) clearInterval(this.interval);
   }
 
   //Busca por ID el objeto que seleccionamos de la lista para mostrarlo activo
@@ -189,7 +252,7 @@ export class VistaPreviaComponent implements OnInit {
     this.objetoSeleccionado = event.target.value;
   }
 
-  exportarSVG() {
+  persistirSVG() {
     console.log(this.figuras);
     this.dataService.guardarSvg(this.figuras);
 
@@ -245,9 +308,38 @@ export class VistaPreviaComponent implements OnInit {
 
   //Retorna un boolean dependiendo si es line o no
   esLinea(seleccionado: object) {
-    if (seleccionado instanceof fabric.Line) {
-      return false;
+    return seleccionado instanceof fabric.Line;
+  }
+
+  esTexto(seleccionado: object): boolean {
+    return seleccionado instanceof fabric.Text;
+  }
+
+  editarTexto(objetoTexto: any) {
+    if (objetoTexto instanceof fabric.Text) {
+      // Mostrar el input
+      const inputElement = this.nuevoTextoRef.nativeElement as HTMLInputElement;
+      if (inputElement) {
+        inputElement.style.display = 'inline-block';
+        inputElement.value = objetoTexto.text!;
+        inputElement.focus();
+      }
     }
-    return true;
+  }
+
+  confirmarEdicion(objetoTexto: any, nuevoTexto: string) {
+    if (objetoTexto instanceof fabric.Text) {
+      if (nuevoTexto.trim() !== '') {
+        objetoTexto.set({ text: nuevoTexto });
+        this.forzarActualizacion(objetoTexto);
+        this.canvas?.renderAll();
+      }
+    }
+
+    // Ocultar el input después de editar
+    const inputElement = this.nuevoTextoRef.nativeElement as HTMLInputElement;
+    if (inputElement) {
+      inputElement.style.display = 'none';
+    }
   }
 }

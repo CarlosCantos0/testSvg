@@ -11,6 +11,7 @@ import { CanvasService } from './services/canvas.service';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import {MatMenuModule} from '@angular/material/menu';
 import { HttpClientModule } from '@angular/common/http';
+import { FormsModule } from '@angular/forms';
 
 @NgModule({
   declarations: [
@@ -23,7 +24,8 @@ import { HttpClientModule } from '@angular/common/http';
     AppRoutingModule,
     BrowserAnimationsModule,
     MatMenuModule,
-    HttpClientModule
+    HttpClientModule,
+    FormsModule
   ],
   providers: [
     FiguraService,

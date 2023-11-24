@@ -1,4 +1,4 @@
-<canvas  id="canvas"></canvas>
+<canvas id="canvas"></canvas>
 
 <mat-menu #contextMenu="matMenu">
   <button mat-menu-item (click)="traerAlFrente()">Traer al frente</button>
@@ -9,10 +9,11 @@
 <br>
 
 
-<button class="tamaño-boton" (click)="exportarSVG()">Guardar SVG</button>
+<button class="tamaño-boton" (click)="persistirSVG()">Guardar SVG</button>
 <button class="tamaño-boton" (click)="devolverAlmacen()">Console del almacen</button>
 <button class="tamaño-boton" (click)="cargar()">Refrescar datos</button>
 <button class="tamaño-boton" (click)="devolverAlmacenTiempoReal()">Almacen Tiempo Real</button>
+<button class="tamaño-boton" (click)="limpiaInterval()">Parar almacen tiempo real</button>
 
 <div class="contenedor">
   <div class="figuras-list">
@@ -29,15 +30,23 @@
     <div *ngIf="esLinea(objetoSeleccionado)">
       <label for="color">Selecciona el color de relleno: </label>
       <input type="color" id="color" [value]="objetoSeleccionado!.fill" (change)="actualizarColor($event)" />
-      </div>
-      <br>
-      <label for="color">Selecciona el color del borde: </label>
-      <input type="color" id="color" [value]="objetoSeleccionado!.stroke" (change)="actualizarColorBorde($event)" />
+    </div>
+    <br>
+    <label for="color">Selecciona el color del borde: </label>
+    <input type="color" id="color" [value]="objetoSeleccionado!.stroke" (change)="actualizarColorBorde($event)" />
 
     <br>
     <br>
     <p>Tipo de figura = {{ objetoSeleccionado.type }}</p>
-    <p>Coordenada X = {{ objetoSeleccionado.left }}</p>
-    <p>Coordenada Y = {{ objetoSeleccionado.top }}</p>
+    <p><input type="number" [(ngModel)]="objetoSeleccionado.left" /></p>
+    <p><input type="number" [(ngModel)]="objetoSeleccionado.top" /></p>
+    <p *ngIf="esTexto(objetoSeleccionado)">
+      <button (click)="editarTexto(objetoSeleccionado)">Editar Texto</button>
+      <input #nuevoTexto (keydown.enter)="confirmarEdicion(objetoSeleccionado, nuevoTexto.value)" (blur)="confirmarEdicion(objetoSeleccionado, nuevoTexto.value)" />
+    </p>
+    <p *ngIf="esLinea(objetoSeleccionado)">
+      <!-- <input type="number" [(ngModel)]="objetoSeleccionado.setCoords" /> -->
+      <!-- <input type="number" [(ngModel)]="objetoSeleccionado.top" /> -->
+    </p>
   </div>
 </div>

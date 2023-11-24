@@ -1,4 +1,4 @@
-export type Formas = '' | 'cuadrado-rectangulo' | 'texto' | 'linea'
+export type Formas = '' | 'rect' | 'text' | 'line'
 export type Fuentes = 'Arial' | 'sans-serif' | 'serif' | 'monospace' | 'Times New Roman' | '';
 
 
@@ -21,4 +21,5 @@ export interface SvgBase {
   x2: number;
   y1: number;
   y2: number;
+  name: string;
 }

@@ -3,21 +3,21 @@
 
 <svg xmlns="http://www.w3.org/2000/svg" width="1000" height="600" class="p-3">
   <ng-container *ngFor="let figura of elementosAlmacen">
-    <ng-container *ngIf="figura.forma === 'cuadrado-rectangulo'">
+    <ng-container *ngIf="figura.forma === 'rect'">
 
         <!-- Cuadrado o Rectángulo -->
       <rect [attr.x]="figura.coordX" [attr.y]="figura.coordY" [attr.width]="figura.width"
         [attr.height]="figura.height" [attr.fill]="figura.rellenado ? figura.fill : 'none'"
         [attr.stroke]="figura.stroke" [attr.stroke-width]="figura.strokeWidth" />
     </ng-container>
-    <ng-container *ngIf="figura.forma === 'texto'">
+    <ng-container *ngIf="figura.forma === 'text'">
         <!-- Texto -->
       <text [attr.x]="figura.coordX" [attr.y]="figura.coordY" [attr.font-family]="figura.fonts"
         [attr.font-size]="figura.sizeLetter" [attr.fill]="figura.stroke">
         {{ figura.text }}
       </text>
     </ng-container>
-    <ng-container *ngIf="figura.forma === 'linea'">
+    <ng-container *ngIf="figura.forma === 'line'">
         <!-- Línea -->
       <line [attr.x1]="figura.x1" [attr.y1]="figura.y1" [attr.x2]="figura.x2" [attr.y2]="figura.y2"
         [attr.stroke]="figura.stroke" [attr.stroke-width]="figura.strokeWidth" />

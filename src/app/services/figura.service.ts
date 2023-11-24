@@ -32,6 +32,7 @@ export class FiguraService {
       opacity: 0.65,
     });
 
+    this.canvas!.sendToBack(rectangulo);
 
 
     this.canvas!.sendToBack(this.objetoSeleccionado!)
@@ -77,8 +78,30 @@ export class FiguraService {
       this.seleccionarFigura(options.target!);
     });
 
+    //! ANIMACION DE LA LINEA INCORRECTA
     if (linea) {
       this.canvas?.add(linea);
+
+
+      // Define la animación
+      linea.animate('scaleX', 1, {
+        duration: 2000,
+        onChange: this.canvas!.renderAll.bind(this.canvas!),
+        easing: fabric.util.ease.easeInOutSine,
+      });
+
+      linea.animate('angle', 360, {
+        duration: 2000,
+        onChange: this.canvas!.renderAll.bind(this.canvas!),
+        easing: fabric.util.ease.easeInOutSine,
+      });
+
+      // Cambio gradual de color
+      linea.animate('stroke', 'red', {
+        duration: 2000,
+        onChange: this.canvas!.renderAll.bind(this.canvas!),
+        easing: fabric.util.ease.easeInOutSine,
+      });
     }
 
     this.canvas!.on('mouse:dblclick', (event) => {

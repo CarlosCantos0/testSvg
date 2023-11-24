@@ -1,6 +1,6 @@
 import { Injectable, OnInit } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Observable, Subject, from, mergeMap, toArray } from 'rxjs';
+import { BehaviorSubject, Observable, Subject, from, mergeMap, toArray } from 'rxjs';
 import { SvgBase } from '../interfaces/svgBase.interface';
 import { IpersistenciaSvg } from '../interfaces/ipersistencia-svg';
 import { fabric } from 'fabric';
@@ -11,6 +11,9 @@ import { fabric } from 'fabric';
 export class DataService implements IpersistenciaSvg {
 
   private baseUrl = 'http://localhost:3000';
+
+  private datosActualizadosSubject = new BehaviorSubject<SvgBase[]>([]);
+  datosActualizados$ = this.datosActualizadosSubject.asObservable();
 
   constructor(private http: HttpClient) {
     this.actualizacionDatosSubject.subscribe((datos: SvgBase[]) => {
@@ -38,7 +41,7 @@ export class DataService implements IpersistenciaSvg {
       .toPromise()
       .then(() => 'Elementos actualizados exitosamente')
       .catch(error => {
-        throw new Error('Error al actualizar elementos: ' + error.message.value);
+        throw new Error('Error al actualizar elementos: ' + error.message);
       });
   }
 
@@ -76,13 +79,11 @@ export class DataService implements IpersistenciaSvg {
   // Método para actualizar datos en la lista existente
   private actualizarDatos(datosActualizados: SvgBase[]): void {
     datosActualizados.forEach((nuevoDato: SvgBase) => {
-      const elementoExistente = this.elementos.find(elemento => elemento.id === nuevoDato.id);
+      const elementoExistente = this.elementos.find(elemento => elemento.id == nuevoDato.id);
     if (elementoExistente) {
       // Actualizar propiedades del elemento existente con los valores del nuevo dato
       Object.assign(elementoExistente, nuevoDato);
-      console.log('Actualizando: ' + nuevoDato.text);
     } else {
-      console.log('Push');
       // Si el elemento no existe en la lista actual, se puede agregar si es necesario
       this.elementos.push(nuevoDato);
     }
@@ -124,6 +125,10 @@ export class DataService implements IpersistenciaSvg {
         this.actualizacionDatosSubject.next(this.elementos);
       }
     }
+  }
+
+  actualizarDatosComponente(datos: SvgBase[]): void {
+    this.datosActualizadosSubject.next(datos);
   }
 
 }
