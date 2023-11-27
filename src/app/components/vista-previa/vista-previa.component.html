@@ -1,0 +1,59 @@
+<canvas id="canvas"></canvas>
+
+<mat-menu #contextMenu="matMenu">
+  <button mat-menu-item (click)="traerAlFrente()">Traer al frente</button>
+  <button mat-menu-item (click)="llevarAlFondo()">Llevar al fondo</button>
+  <button mat-menu-item (click)="eliminarFigura(objetoSeleccionado!)">Eliminar Figura</button>
+</mat-menu>
+<button mat-button [disabled]="true" [matMenuTriggerFor]="contextMenu"></button>
+
+<br>
+
+
+<button class="tamaño-boton" (click)="persistirSVG()">Guardar SVG</button>
+<button class="tamaño-boton" (click)="devolverAlmacen()">Console del almacen</button>
+<button class="tamaño-boton" (click)="cargar()">Refrescar datos</button>
+<button class="tamaño-boton" (click)="devolverAlmacenTiempoReal()">Almacen Tiempo Real</button>
+<button class="tamaño-boton" (click)="limpiaInterval()">Parar almacen tiempo real</button>
+<button class="tamaño-boton" (click)="crearNuevaFigura(figuraService.crearCuadradoGenerico)">CrearCuadradoGenerico</button>
+<button class="tamaño-boton" (click)="crearNuevaFigura(figuraService.crearLineaGenerica)">Crear Línea</button>
+<button class="tamaño-boton" (click)="crearNuevaFigura(figuraService.crearTextoGenerico)">Crear Texto</button>
+
+
+<div class="contenedor">
+  <mat-list class="figuras-list" [style.overflow-y]="figuras.length > 0 ? 'scroll' : 'auto'"
+           [style.height.px]="230">
+    <mat-list-item *ngFor="let figura of figuras; let i = index" (click)="seleccionarFiguraLista(figura!)">
+      <button mat-raised-button color="primary" class="tamaño-lista">
+        Forma {{ figura.forma + ' ' + (i + 1)}}
+      </button>
+    </mat-list-item>
+  </mat-list>
+
+  <div class="propiedades-figura" *ngIf="objetoSeleccionado">
+    <div *ngIf="esLinea(objetoSeleccionado)">
+      <label for="color">Selecciona el color de relleno: </label>
+      <input type="color" id="color" [value]="objetoSeleccionado!.fill" (change)="actualizarColor($event)" />
+    </div>
+    <br>
+    <label for="color">Selecciona el color del borde: </label>
+    <input type="color" id="color" [value]="objetoSeleccionado!.stroke" (change)="actualizarColorBorde($event)" />
+
+    <br>
+    <br>
+    <p>Tipo de figura = {{ objetoSeleccionado.name }}</p>
+    <p><input type="number" [(ngModel)]="objetoSeleccionado.left" /></p>
+    <p><input type="number" [(ngModel)]="objetoSeleccionado.top" /></p>
+    <p><input type="number" [(ngModel)]="objetoSeleccionado.height" /></p>
+    <p><input type="number" [(ngModel)]="objetoSeleccionado.width" /></p>
+    <p *ngIf="esTexto(objetoSeleccionado)"><input type="number" [(ngModel)]="objetoSeleccionado.fontSize" /></p>
+    <p *ngIf="esTexto(objetoSeleccionado)">
+      <button (click)="editarTexto(objetoSeleccionado)">Editar Texto</button>
+      <input #nuevoTexto (keydown.enter)="confirmarEdicion(objetoSeleccionado, nuevoTexto.value)" (blur)="confirmarEdicion(objetoSeleccionado, nuevoTexto.value)" />
+    </p>
+    <p *ngIf="esLinea(objetoSeleccionado)">
+      <!-- <input type="number" [(ngModel)]="objetoSeleccionado.setCoords" /> -->
+      <!-- <input type="number" [(ngModel)]="objetoSeleccionado.top" /> -->
+    </p>
+  </div>
+</div>
