@@ -13,8 +13,7 @@ import {MatMenuModule} from '@angular/material/menu';
 import { HttpClientModule } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { MatListModule } from '@angular/material/list';
-import { PERSISTENCIA_SVG_TOKEN } from './components/vista-previa/token-servicio';
-import { DataService } from './services/data.service';
+import { MatButtonModule } from '@angular/material/button';
 
 @NgModule({
   declarations: [
@@ -29,14 +28,15 @@ import { DataService } from './services/data.service';
     MatMenuModule,
     HttpClientModule,
     FormsModule,
-    MatListModule
+    MatListModule,
+    MatButtonModule
   ],
   providers: [
     FiguraService,
     CodoService,
     CanvasService,
-    { provide: PERSISTENCIA_SVG_TOKEN, useClass: DataService }
   ],
   bootstrap: [AppComponent]
 })
 export class AppModule { }
+

@@ -6,7 +6,7 @@
 
 ul {
   list-style: decimal-leading-zero;
-  padding: 5;
+  padding: 2;
   margin: 5;
 }
 
@@ -17,9 +17,10 @@ ul {
   background-color: rgb(0, 238, 255); /* Color de fondo si es necesario */
   border: 1px solid #ccc; /* Borde si es necesario */
   border-radius: 5px; /* Borde redondeado si es necesario */
-  max-height: calc(100% - 40px); /* Altura máxima con margen superior e inferior */
+  max-height: 220px; /* Altura máxima con margen superior e inferior */
   overflow-y: auto; /* Agregar barra de desplazamiento vertical si es necesario */
   z-index: 1; /* Asegurarse de que esté por encima del canvas u otros elementos */
+  width: 200px;
 }
 
 .propiedades-figura {
@@ -27,8 +28,9 @@ ul {
   top: -500px !important;
   right: 50px !important;
   background-color: #fff;
-  padding: 10px;
+  padding: 5px;
   border: 1px solid #ccc;
+  border-radius: 5px;
 }
 
 .tamaño-boton {
@@ -39,8 +41,55 @@ ul {
 }
 
 .tamaño-lista {
-  font-size: 20px; /* Ajusta el tamaño de la fuente */
+  font-size: 15px; /* Ajusta el tamaño de la fuente */
   padding: 10px 15px;
   margin-top: 3px;
   width: 100%; /* Opcional: Ajusta el ancho de los botones */
+}
+
+.canvas-container {
+  border: 2px solid #ccc; /* Añadir un borde al contenedor */
+  border-radius: 5px; /* Añadir bordes redondeados */
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.1); /* Añadir sombra para resaltar el canvas */
+  width: 1400px; /* Ajustar el ancho del contenedor según sea necesario */
+  height: 800px; /* Ajustar la altura del contenedor según sea necesario */
+  display: flex; /* Usar flexbox para centrar el canvas */
+  justify-content: center; /* Centrar horizontalmente */
+  align-items: center; /* Centrar verticalmente */
+  margin-top: 10px;
+  margin-left: 10px;
+}
+
+canvas {
+  /* Estilos adicionales para el canvas */
+  display: block;
+  max-width: 100%; /* Para asegurar que el canvas no se desborde del contenedor */
+}
+
+.dashed-line {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none; /* Para permitir eventos debajo */
+  z-index: 999999; /* Asegura que esté encima del canvas */
+}
+
+.dashed-line::before {
+  content: "";
+  position: absolute;
+  height: 2px; /* Altura de la línea */
+  width: 100%; /* Ancho de la línea */
+  border-top: 2px dashed transparent; /* Línea punteada transparente */
+  animation: dash 2s linear infinite; /* Animación 'dash' de 2 segundos, lineal e infinita */
+}
+
+@keyframes dash {
+  from {
+    background-position: 0; /* Posición inicial de la animación */
+  }
+  to {
+    background-position: 10px; /* Posición final de la animación */
+  }
 }

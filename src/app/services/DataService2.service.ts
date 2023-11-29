@@ -8,7 +8,7 @@ import { fabric } from 'fabric';
 @Injectable({
   providedIn: 'root'
 })
-export class DataService implements IpersistenciaSvg {
+export class DataService2 implements IpersistenciaSvg {
 
   private baseUrl = 'http://localhost:3000';
 
@@ -54,7 +54,6 @@ export class DataService implements IpersistenciaSvg {
     return this.http.delete(`${this.baseUrl}/FigurasData/${parseInt(elemento.name!)}`, httpOptions);
   }
 
-  //Actualizamos los elementos modificados en el json server
   private actualizarElementos(elementos: SvgBase[], httpOptions: any): Observable<any> {
     console.log('actualizar elementos');
 
@@ -94,6 +93,7 @@ export class DataService implements IpersistenciaSvg {
 
         // Actualizamos el elemento en el backend
         this.guardarSvg(this.elementos);
+        //this.actualizarDatos(this.elementos);
 
       }
     }, 2500); // Ejecutar cada 2.5 segundos (en milisegundos)
@@ -101,7 +101,6 @@ export class DataService implements IpersistenciaSvg {
 
   // Método para actualizar datos en la lista existente
   private actualizarDatos(datosActualizados: SvgBase[]): void {
-
     datosActualizados.forEach((nuevoDato: SvgBase) => {
       const elementoExistente = this.elementos.find(elemento => elemento.id == nuevoDato.id);
     if (elementoExistente) {
@@ -123,6 +122,11 @@ export class DataService implements IpersistenciaSvg {
           resolve(elementos)
         })
     })
+  }
+
+  // Log del almacén para realizar pruebas dev
+  devolverAlmacen() {
+    console.log(this.elementos)
   }
 
   // Método para recibir actualizaciones

@@ -1,11 +1,11 @@
 export type Formas = '' | 'rect' | 'text' | 'line'
 //export type Fuentes = 'Arial' | 'sans-serif' | 'serif' | 'monospace' | 'Times New Roman' | '';
-
+export type estadoBorde = '' | 'neutral' | '30min' | '10min' | 'sinCurro' | 'conCurro'
 
 export interface SvgBase {
   rellenado: boolean;
   id: number;
-  forma: Formas;
+  forma: string;
   coordX: number;
   coordY: number;
   width: number;
@@ -24,4 +24,7 @@ export interface SvgBase {
   name: string;
   scaleX: number;
   scaleY: number;
+  angle: number;
+  strokeDashArray: number[],
+  estadoBorde: estadoBorde
 }

@@ -16,8 +16,8 @@ export class CanvasService {
 
   inicializarCanvas(): fabric.Canvas {
     this.canvas = new fabric.Canvas('canvas', {
-      width: 800, // Ancho en píxeles
-      height: 700, // Alto en píxeles
+      width: 1400, // Ancho en píxeles
+      height: 800, // Alto en píxeles
       backgroundColor: 'white', // Color de fondo del lienzo
       selection: true, // Habilita la selección de objetos
       selectionBorderColor: 'blue', // Color del borde de selección

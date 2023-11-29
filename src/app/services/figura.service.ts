@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { SvgBase } from '../interfaces/svgBase.interface';
+import { SvgBase, estadoBorde } from '../interfaces/svgBase.interface';
 import { fabric } from 'fabric';
 import { CodoService } from './codo.service';
 import { CanvasService } from './canvas.service';
@@ -15,7 +15,7 @@ export class FiguraService {
   objetoSeleccionado: fabric.Object | undefined;
   codoMode: boolean = true;
 
-  constructor(private codoService: CodoService) {}
+  constructor(private codoService: CodoService) { }
 
   //Obtenemos el canvas a modificar
   inicializar(canvasService: CanvasService): fabric.Canvas {
@@ -35,10 +35,11 @@ export class FiguraService {
       stroke: figura.stroke,
       name: figura.id.toString(),
       opacity: 0.65,
+      angle: figura.angle
     });
 
     rectangulo.on('mousedown', (options) => {
-      this.seleccionarFigura(options.target!);
+      //this.seleccionarFigura(options.target!);
     });
 
     return rectangulo;
@@ -60,7 +61,7 @@ export class FiguraService {
     });
 
     cuadradoGenerico.on('mousedown', (options) => {
-      this.seleccionarFigura(options.target!);
+      //this.seleccionarFigura(options.target!);
     });
 
     return cuadradoGenerico;
@@ -79,7 +80,9 @@ export class FiguraService {
       stroke: figura.stroke,
       name: figura.id.toString(),
       scaleX: figura.scaleX,
-      scaleY: figura.scaleY
+      scaleY: figura.scaleY,
+      angle: figura.angle
+
     });
     return texto;
   }
@@ -110,10 +113,12 @@ export class FiguraService {
       strokeWidth: figura.strokeWidth,
       name: figura.id.toString(),
       opacity: 0.85,
+      angle: figura.angle,
+      strokeDashArray: [10, 5],
     });
 
     linea.on('mousedown', (options) => {
-      this.seleccionarFigura(options.target!);
+      //this.seleccionarFigura(options.target!);
     });
 
     this.canvas!.on('mouse:dblclick', (event) => {
@@ -123,29 +128,44 @@ export class FiguraService {
       }
     });
 
+    let alternar = false;
+    //animateLine(this.canvas!, lineaAnimacion, figura.x1, figura.x2)
+    setInterval(() => {
+      animate()
+      this.canvas!.renderAll();
+    }, 300)
 
+    function animate() {
+      if (alternar) {
+        linea.strokeDashArray = [7, 5, 14];
+      } else {
+        linea.strokeDashArray = [3, 8, 7];
+      }
+      alternar = !alternar; // Alternar entre true y false
+
+    }
     return linea;
   }
 
-  //Método para crear un elemento línea 'genérico' al pulsar el botón
-  crearLineaGenerica = () => {
-    this.id++;
-    const linea = new fabric.Line([50, 50, 200, 200], {
-      stroke: 'black',
-      fill: 'black',
-      strokeWidth: 3,
-      name: this.id.toString(),
-      opacity: 0.85,
-    });
+//Método para crear un elemento línea 'genérico' al pulsar el botón
+crearLineaGenerica = () => {
+  this.id++;
+  const linea = new fabric.Line([50, 50, 200, 200], {
+    stroke: 'black',
+    fill: 'black',
+    strokeWidth: 3,
+    name: this.id.toString(),
+    opacity: 0.85,
+  });
 
-    linea.on('mousedown', (options) => {
-      this.seleccionarFigura(options.target!);
-    });
+  linea.on('mousedown', (options) => {
+    //this.seleccionarFigura(options.target!);
+  });
 
-    return linea;
-  }
+  return linea;
+}
 
-  seleccionarFigura(figura: fabric.Object): fabric.Object {
-    return this.objetoSeleccionado = figura;
-  }
+// seleccionarFigura(figura: fabric.Object): fabric.Object {
+//   return this.objetoSeleccionado = figura;
+// }
 }
