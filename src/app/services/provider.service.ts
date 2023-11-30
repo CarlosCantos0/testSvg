@@ -4,6 +4,8 @@ import { IpersistenciaSvg } from '../interfaces/ipersistencia-svg';
 import { DataService } from './data.service';
 import { HttpClient } from '@angular/common/http';
 import { DataService2 } from './DataService2.service';
+import { Subject } from 'rxjs';
+import { SvgBase } from '../interfaces/svgBase.interface';
 
 @Injectable({
   providedIn: 'root'

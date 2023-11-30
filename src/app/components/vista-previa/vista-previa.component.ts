@@ -8,8 +8,6 @@ import { MatMenuTrigger } from '@angular/material/menu';
 import { Subscription } from 'rxjs';
 import { IpersistenciaSvg } from 'src/app/interfaces/ipersistencia-svg';
 import { ProviderService } from '../../services/provider.service';
-import { Group } from 'fabric/fabric-impl';
-import { estadoBorde } from '../../interfaces/svgBase.interface';
 
 export interface LineCodoMap {
   lines: fabric.Line[];     // Array que almacena las dos líneas
@@ -24,7 +22,7 @@ export interface LineCodoMap {
 })
 export class VistaPreviaComponent {
 
-  tipoBorde: string = 'neutral'
+  estadoBorde: string = 'neutral'
 
   @ViewChild('canvasEl') canvasEl!: ElementRef<HTMLCanvasElement>;
   @ViewChild(MatMenuTrigger) contextMenu!: MatMenuTrigger;
@@ -46,6 +44,8 @@ export class VistaPreviaComponent {
 
   dataService!: IpersistenciaSvg
 
+  private almacenIntervalos: any = {}
+
   constructor(
     private providerService: ProviderService,
     public figuraService: FiguraService,
@@ -57,16 +57,17 @@ export class VistaPreviaComponent {
         this.dataService = servicio
         this.actualizarDatos();
         this.cargar();
+        this.dataService.elementosGestor.subscribe(elementos => {
+          this.figuras = elementos
+          this.figurasAlmacen(this.figuras)
+        })
       })
   }
-
 
   cargar() {
     this.canvas = this.canvasService.inicializarCanvas();
     this.canvas.renderAll();
     this.filtrarFigurasAñadirCanvas();
-    //console.log(this.figuras)
-
   }
 
   // Método para dibujar las figuras en el canvas
@@ -82,8 +83,9 @@ export class VistaPreviaComponent {
   async actualizarDatos(): Promise<void> {
     return new Promise<void>((resolve) => {
       setTimeout(async () => {
-        const data = await this.dataService.leerLayout();
+        const data = await this.dataService.leerJson();
         this.figuras = data;
+        console.log(this.figuras)
         resolve();
       }, 500);
     });
@@ -91,6 +93,7 @@ export class VistaPreviaComponent {
 
   //Recorremos la lista de figuras y las añadimos al canvas y lo vinculamos con sus actualizaciones
   figurasAlmacen(figuras: SvgBase[]) {
+    this.canvas!.clear();
     figuras.forEach((figura) => {
       const objetoCanva = this.crearObjetoFabric(figura);
       if (objetoCanva) {
@@ -153,7 +156,8 @@ export class VistaPreviaComponent {
   //Le pasamos un objeto y lo añade al canvas
   agregarObjetoAlCanvas(objetoCanva: fabric.Object) {
     if (objetoCanva instanceof fabric.Line) {
-      this.actualizarLineaEnAlmacen(objetoCanva); //Llamamos el método para poder visualizar la animación
+      this.actualizarLineaEnAlmacen(objetoCanva); //Llamamos el método para poder visualizar la animación de la linea
+      this.actualizarEstadoLinea(objetoCanva, 'neutral');
     }
     this.canvas!.add(objetoCanva);
   }
@@ -169,22 +173,36 @@ export class VistaPreviaComponent {
   registrarEventoModificacion() {
     this.canvas!.on('object:modified', (event: any) => {
 
+      console.log('actualizar')
       const modifiedObject = event.target; // Objeto modificado en el canvas¡
       let updatedData = {} as SvgBase[];
 
       //Si se trata de una Linea
-      if (modifiedObject instanceof fabric.Line) updatedData = this.elementoLinea(modifiedObject);
-
+      if (modifiedObject instanceof fabric.Line) {
+        updatedData = this.elementoLinea(modifiedObject);
+      }
 
       //Si se trata de un Texto
-      if (modifiedObject instanceof fabric.Text) updatedData = this.elementoTexto(modifiedObject);
+      if (modifiedObject instanceof fabric.Text) {
+         updatedData = this.elementoTexto(modifiedObject);
+      }
 
       //Si se trata de un cuadrado-rectangulo
-      if (modifiedObject instanceof fabric.Rect) updatedData = this.elementoCuadrado(modifiedObject);
+      if (modifiedObject instanceof fabric.Rect) {
+      updatedData = this.elementoCuadrado(modifiedObject);
+      }
 
       this.forzarActualizacion(modifiedObject)
-      // Notificar al servicio de eventos sobre la actualización de datos
-      this.dataService.actualizacionDatosSubject.next(updatedData)
+
+      let indice = this.figuras.findIndex((modifiedObject) => modifiedObject.name === updatedData[0].id.toString())
+      if (indice !== -1) {
+        // Asignar las propiedades del objeto modificado a this.figuras[indice]
+        const figuraModificada = this.figuras[indice];
+        Object.assign(figuraModificada, updatedData[0]);
+        this.figuras[indice] = figuraModificada;
+      } else {
+        console.error('No se encontró el objeto en this.figuras');
+      }
     });
   }
 
@@ -216,8 +234,6 @@ export class VistaPreviaComponent {
   elementoLinea(modifiedObject: any): SvgBase[] {
     const coords = modifiedObject.lineCoords;
     modifiedObject.setCoords //! TODO
-
-    //console.log(x1, y1, x2, y2)
 
     return [{
       id: parseInt(modifiedObject.name!, 10),
@@ -338,13 +354,20 @@ export class VistaPreviaComponent {
     this.codoService.devolverAlmacen();
   }
 
-  //Almacen con cambios en tiempo real
-  devolverAlmacenTiempoReal() {
-    this.dataService.leerTiempoReal();  //!TO DO: función en el servicio para dejar de modificar info
-    this.interval = setInterval(() => {
-      this.filtrarFigurasAñadirCanvas();  //Entramos al filtro de las figuras para tener el canvas
-      this.canvas!.renderAll();             //actualizado con los valores que modificamos arriba
-    }, 4000);
+  //Modo lectura en tiempo real
+  leerTiempoReal() {
+    this.desactivarDragAndDrop()
+    this.dataService.leerTiempoReal();
+  }
+
+  desactivarDragAndDrop() {
+    if (this.canvas) {
+      this.canvas.forEachObject((obj: fabric.Object) => {
+        obj.selectable = false; // Desactivar la interacción de arrastrar y soltar
+      });
+      this.canvas.selection = false; // Desactivar la selección de múltiples objetos
+      this.canvas.renderAll(); // Renderizar el canvas para aplicar los cambios
+    }
   }
 
   //Desactivamos el almacen en tiempo real
@@ -367,14 +390,20 @@ export class VistaPreviaComponent {
     this.canvas!.renderAll();
   }
 
+  //Actualiza el texto en el almacen para tener los valores actualizados
+  actualizarTexto(texto: fabric.Object) {
+    this.actualizarValoresObjetoEnAlmacen(texto);
+  }
+
   //Modificar el color
   actualizarColor(event: any) {
-    if (this.canvas) {
-      if (this.objetoSeleccionado) {
+    if (this.canvas && this.objetoSeleccionado) {
+      if (this.objetoSeleccionado instanceof fabric.Rect || this.objetoSeleccionado instanceof fabric.Text) {
         this.objetoSeleccionado.fill = event.target.value;
-        this.forzarActualizacionCanvas(this.objetoSeleccionado);//Para ver el nuevo color necesitamos hacer una actualización (forzosa?)
-        this.actualizarColorEnAlmacen(this.objetoSeleccionado);
       }
+        this.forzarActualizacionCanvas(this.objetoSeleccionado);//Para ver el nuevo color necesitamos hacer una actualización (forzosa?)
+        this.actualizarValoresObjetoEnAlmacen(this.objetoSeleccionado);
+
     }
   }
 
@@ -384,30 +413,41 @@ export class VistaPreviaComponent {
       if (this.objetoSeleccionado) {
         this.objetoSeleccionado.stroke = event.target.value;
         this.forzarActualizacionCanvas(this.objetoSeleccionado); //Para ver el nuevo color necesitamos hacer una actualización (forzosa?)
-        this.actualizarColorEnAlmacen(this.objetoSeleccionado);
+        this.actualizarValoresObjetoEnAlmacen(this.objetoSeleccionado);
       }
     }
   }
 
   //Asigna el valor del color en el json server
-  actualizarColorEnAlmacen(objeto: fabric.Object) {
-    let updatedData = {} as SvgBase[];
+  actualizarValoresObjetoEnAlmacen(objeto: fabric.Object) {
+    let updatedData: SvgBase[] = [];
 
     if (objeto instanceof fabric.Line) {
+      console.log('linea')
       updatedData = this.elementoLinea(objeto);
     } else if (objeto instanceof fabric.Text) {
+      console.log('texto')
       updatedData = this.elementoTexto(objeto);
     } else {
+      console.log('cuadrado')
       updatedData = this.elementoCuadrado(objeto);
     }
-    // Notificar al servicio de eventos sobre la actualización de datos
-    this.dataService.actualizacionDatosSubject.next(updatedData)
+
+    //Asignamos los valores de actualización al objeto
+    //! Ya que el método principal funciona con object:modified pero cuando cambias el color no salta el evento por lo que tenemos este método
+    const index = this.figuras.findIndex((figura) => figura.id === updatedData[0].id);
+    if (index !== -1) {
+      // Actualiza los datos en this.figuras
+      this.figuras[index] = updatedData[0];
+    } else {
+      console.error('El objeto no se encontró en this.figuras');
+    }
   }
 
   // Forzamos la actualización del color para verlo reflejado en el canvas reduciendo el tamaño del objeto a modificar
   forzarActualizacionCanvas(objetoSeleccionado: any) {
-    objetoSeleccionado.scaleX! *= 0.9999999; // Reduce la escala en un 0.0001% en el eje X para forzar una actualizacion del color
-    objetoSeleccionado.scaleY! *= 0.9999999; // Reduce la escala en un 0.0001% en el eje Y
+    objetoSeleccionado.scaleX! *= 0.9999999; //! Reduce la escala en un 0.000001% en el eje X para forzar una actualizacion gráfica
+    objetoSeleccionado.scaleY! *= 0.9999999; // Reduce la escala en un 0.000001% en el eje Y
     this.canvas!.renderAll();
     this.editar = false;
   }
@@ -450,6 +490,7 @@ export class VistaPreviaComponent {
   }
 
   //Modifica el indexZ para llevar al frente a la figura seleccionada
+  //! Para persistir el indexZ deberemos de modificar el orden en el que se guardarán los objetos en nuestra lista
   traerAlFrente(): void {
     const clickedObject = this.canvas!.getActiveObject();
     if (clickedObject) {
@@ -459,6 +500,7 @@ export class VistaPreviaComponent {
   }
 
   //Modifica el indexZ para llevar al fondo a la figura seleccionada
+  //! Para persistir el indexZ deberemos de modificar el orden en el que se guardarán los objetos en nuestra lista
   llevarAlFondo(): void {
     const clickedObject = this.canvas!.getActiveObject();
     if (clickedObject) {
@@ -490,38 +532,7 @@ export class VistaPreviaComponent {
     return objeto && objeto.text !== undefined;
   }
 
-  //Edición del texto que tenemos dentro del elementos de texto
-  editarTexto(objetoTexto: any) {
-    if (objetoTexto instanceof fabric.Text) {
-      // Mostrar el input
-      const inputElement = this.nuevoTextoRef.nativeElement as HTMLInputElement;
-      if (inputElement) {
-        inputElement.style.display = 'inline-block';
-        inputElement.value = objetoTexto.text!;
-        inputElement.focus();
-      }
-    }
-  }
-
-  //Vinculado con un botón para confirmar la edición
-  confirmarEdicion(objetoTexto: fabric.Object, nuevoTexto: string) {
-    if (objetoTexto instanceof fabric.Text) {
-      if (nuevoTexto.trim() !== '') {
-        objetoTexto.set({ text: nuevoTexto });
-        console.log(nuevoTexto)
-        this.actualizarTextoEnElementoAlmacen(objetoTexto)
-        this.forzarActualizacion(objetoTexto);
-        this.canvas?.renderAll();
-      }
-    }
-
-    // Ocultar el input después de editar
-    const inputElement = this.nuevoTextoRef.nativeElement as HTMLInputElement;
-    if (inputElement) {
-      inputElement.style.display = 'none';
-    }
-  }
-
+  //Vacía el canvas de objetos y nuestro almacen
   limpiarCanvas() {
     if (this.canvas) {
       this.canvas.clear();
@@ -544,6 +555,7 @@ export class VistaPreviaComponent {
     }
   }
 
+  //Carga de nuestro sistema de ficheros local un .svg en el lienzo
   loadSvg(svgContent: string): void {
     if (this.canvas !== undefined) {
       fabric.loadSVGFromURL(`data:image/svg+xml;base64,${btoa(svgContent)}`, (objects, options) => {
@@ -566,68 +578,68 @@ export class VistaPreviaComponent {
     }
   }
 
+  //Separa por tipo de figuras en el HTML
   getFigurasPorTipo(tipo: string): SvgBase[] {
     return this.figuras.filter(figura => figura.forma === tipo);
   }
 
   //Selector de trabajo para las líneas
-  actualizarEstadoLinea(linea: fabric.Object) {
+  actualizarEstadoLinea(linea: fabric.Object, estadoBorde: string) {
+    this.alterarEstadoLinea(linea, estadoBorde)
+
+    if (linea.stroke === '#00FE18') {
+      console.log('linea color exacto')
+      this.intervaloAnimacion(linea)
+    } else this.limpiarEstado(linea)
+
+    this.actualizarColor(linea)
+    // Renderizar el canvas para reflejar los cambios
+    this.canvas!.renderAll();
+  }
+
+  private alterarEstadoLinea(linea: fabric.Object, estadoBorde: string): void {
+    let alternar: boolean = false;
     if (linea instanceof fabric.Line) {
       let colorBorde = 'black';
-      if (this.tipoBorde === 'conCurro') {
-        colorBorde = '#00FE18'; // Asignar el color verde si se selecciona 'Con curro'
-      } else if (this.tipoBorde === 'sinCurro') {
-        colorBorde = '#FF0000'; // Asignar el color rojo si se selecciona 'Sin curro'
-      } else if (this.tipoBorde === '10min') {
-        colorBorde = '#0033FE'
-      } else if (this.tipoBorde === '30min') {
-        colorBorde = '#FEC800'
-      } else {
+      if (estadoBorde === 'conCurro') {
+        colorBorde = '#00FE18';
+        (linea as fabric.Line).set('stroke', colorBorde)
+      } else if (estadoBorde === 'sinCurro') {
+        colorBorde = '#FF0000';
+        linea.strokeDashArray = [NaN];
+        (linea as fabric.Line).set('stroke', colorBorde)
+      } else if (estadoBorde === '10min') {
+        colorBorde = '#0033FE';
+        linea.strokeDashArray = [NaN];
+        (linea as fabric.Line).set('stroke', colorBorde)
+      } else if (estadoBorde === '30min') {
+        colorBorde = '#FEC800';
+        linea.strokeDashArray = [NaN];
+        (linea as fabric.Line).set('stroke', colorBorde)
+      } else if (estadoBorde === 'neutral') {
         colorBorde = '#000000';
+        linea.strokeDashArray = [NaN];
+        //(this.objetoSeleccionado as fabric.Line).set('stroke', colorBorde)
       }
-
-      // Asignar el color al borde del objeto seleccionado
-      (this.objetoSeleccionado as fabric.Line).set('stroke', colorBorde);
-
-      // Renderizar el canvas para reflejar los cambios
-      this.canvas!.renderAll();
     }
   }
 
-  // asignarEstadoInicialALineas() {
-  //   console.log(this.figuras)
-  //   this.figuras.forEach((figura) => {
-  //     if (figura.forma == 'line') {
-  //       let borde: estadoBorde = 'conCurro'
-  //       let colorLinea = figura.stroke;
+  intervaloAnimacion(linea: fabric.Object) {
+    this.almacenIntervalos[linea.name!] = setInterval(() => {
+      this.animate(linea)
+      this.canvas!.renderAll();
+    }, 300)
+  }
 
-  //       if (colorLinea === '#00FE18') {
-  //         borde = 'conCurro';
-  //       } else if (colorLinea === '#FF0000') {
-  //         borde = 'sinCurro';
-  //       } else if (colorLinea === '#0033FE') {
-  //         borde = '10min';
-  //       } else if (colorLinea === '#FEC800') {
-  //         borde = '30min';
-  //       } else if (colorLinea === '#000000') {
-  //         borde = 'neutral';
-  //       }
+  animate(linea: fabric.Object) {
+    if (linea.strokeDashArray![0] === 7) {
+      linea.strokeDashArray = [3, 8, 7];
+    } else {
+      linea.strokeDashArray = [7, 5, 14];
+    }
+  }
 
-  //       figura.estadoBorde = borde;
-  //       console.log(figura.estadoBorde)
-  //       // Actualizar el estado de la línea basado en el color
-  //       //this.actualizarEstadoLinea(figura);
-  //       // Encuentra la línea correspondiente en el canvas y actualiza su estado
-  //       const lineaEnCanvas = this.buscarLineaEnCanvasPorId(figura.id.toString());
-  //       if (lineaEnCanvas) {
-  //         console.log(lineaEnCanvas)
-  //         this.actualizarEstadoLinea(lineaEnCanvas);
-  //       }
-  //     }
-  //   });
-  // }
-
-  // buscarLineaEnCanvasPorId(id: string): fabric.Object | undefined {
-  //   return this.canvas!.getObjects().find((objeto) => objeto.name === id);
-  // }
+  limpiarEstado(linea: fabric.Object) {
+    clearInterval(this.almacenIntervalos[linea.name!]); // Detener la animación
+  }
 }

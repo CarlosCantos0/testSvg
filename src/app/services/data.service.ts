@@ -13,17 +13,19 @@ export class DataService implements IpersistenciaSvg {
   private baseUrl = 'http://localhost:3000';
 
   constructor(private http: HttpClient) {
-    this.actualizacionDatosSubject.subscribe((datos: SvgBase[]) => {
-      this.actualizarDatos(datos); // Actualizar la lista con los datos recibidos
-    });
-   }
+    this.elementosGestor.subscribe(elementos => this.elementos = elementos)
+  }
 
   private elementos: SvgBase[] = [];
+  public elementosGestor: Subject<SvgBase[]> = new Subject<SvgBase[]>
   actualizacionDatosSubject = new Subject<SvgBase[]>(); // Emisor de eventos
 
-  async leerLayout(): Promise<SvgBase[]> {
-    this.elementos = await this.getElementosAlmacenados();
-    return this.elementos;
+  async leerJson(): Promise<SvgBase[]> {
+    return await this.getElementosAlmacenados();
+  }
+
+  public setElementos(elementos: SvgBase[]): void {
+    this.elementosGestor.next(elementos)
   }
 
   async guardarSvg(elementos: SvgBase[]): Promise<any> {
@@ -54,7 +56,7 @@ export class DataService implements IpersistenciaSvg {
     return this.http.delete(`${this.baseUrl}/FigurasData/${parseInt(elemento.name!)}`, httpOptions);
   }
 
-  //Actualizamos los elementos modificados en el json server
+  //Cuando le damos a guardar, actualizamos los elementos existentes posteamos los demás
   private actualizarElementos(elementos: SvgBase[], httpOptions: any): Observable<any> {
     console.log('actualizar elementos');
 
@@ -81,22 +83,40 @@ export class DataService implements IpersistenciaSvg {
 
   //Almacen en tiempo real para realizar modificaciones y visualizar los resultados mientras cambian por pantalla
   leerTiempoReal(): void {
+    let iteraciones: number = 0
+
     console.log('leyendo tiempo real')
-    setInterval(() => {
-      // Simulación de cambios en algunos elementos
-      if (this.elementos.length > 0) {
-        console.log(this.elementos);
-        const randomIndex = Math.floor(Math.random() * this.elementos.length);
-        const randomElement = this.elementos[randomIndex];
-        // Modificar algunos valores del elemento aleatoriamente para simular cambios
-        randomElement.coordX = Math.random() * 100;
-        randomElement.coordY = Math.random() * 100;
+    this.leerJson()
+      .then(elementos => {
 
-        // Actualizamos el elemento en el backend
-        this.guardarSvg(this.elementos);
+        setInterval(async () => {
+          if (elementos.length > 0) {
+            console.log(elementos);
+            if (iteraciones == 0) {
+              elementos[0].text = 'patatas'
+            }
+            if (iteraciones == 3) {
+              elementos[0].text = 'zanahoria'
+            }
+            if (iteraciones == 6) {
+              elementos[0].text = 'empanada de choclo'
+            }
+            if (iteraciones == 9) {
+              elementos[0].text = 'atún al pisto'
+            }
+            if (iteraciones == 12) {
+              elementos[0].text = 'dani master in Angular'
+            }
 
-      }
-    }, 2500); // Ejecutar cada 2.5 segundos (en milisegundos)
+            iteraciones++;
+            this.setElementos(elementos)
+          }
+
+        }, 2500);
+
+      });
+      console.log(iteraciones)
+    // Ejecutar cada 2.5 segundos (en milisegundos)
   }
 
   // Método para actualizar datos en la lista existente
@@ -104,13 +124,13 @@ export class DataService implements IpersistenciaSvg {
 
     datosActualizados.forEach((nuevoDato: SvgBase) => {
       const elementoExistente = this.elementos.find(elemento => elemento.id == nuevoDato.id);
-    if (elementoExistente) {
-      // Actualizar propiedades del elemento existente con los valores del nuevo dato
-      Object.assign(elementoExistente, nuevoDato);
-    } else {
-      // Si el elemento no existe en la lista actual, se puede agregar si es necesario
-      this.elementos.push(nuevoDato);
-    }
+      if (elementoExistente) {
+        // Actualizar propiedades del elemento existente con los valores del nuevo dato
+        Object.assign(elementoExistente, nuevoDato);
+      } else {
+        // Si el elemento no existe en la lista actual, se puede agregar si es necesario
+        this.elementos.push(nuevoDato);
+      }
       //console.log(this.elementos)
     });
   }
@@ -128,22 +148,5 @@ export class DataService implements IpersistenciaSvg {
   // Método para recibir actualizaciones
   recibirActualizacionDatos(): Observable<SvgBase[]> {
     return this.actualizacionDatosSubject.asObservable();
-  }
-
-  //Método para actualizar el texto introducido en el elemento de texto
-  actualizarTexto(modifiedObject: fabric.Text): void {
-    if (modifiedObject instanceof fabric.Text) {
-      const updatedId = parseInt(modifiedObject.name!);
-      const updatedText = modifiedObject.text!;
-
-      // Busca y actualiza el elemento correspondiente en la lista local
-      const elementoActualizado = this.elementos.find(elemento => elemento.id === updatedId);
-      if (elementoActualizado) {
-        elementoActualizado.text = updatedText;
-
-        // Emitir la lista actualizada a través del Subject
-        this.actualizacionDatosSubject.next(this.elementos);
-      }
-    }
   }
 }

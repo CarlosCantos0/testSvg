@@ -12,16 +12,18 @@ export class DataService2 implements IpersistenciaSvg {
 
   private baseUrl = 'http://localhost:3000';
 
+  public elementosGestor: Subject<SvgBase[]> = new Subject<SvgBase[]>
+
   constructor(private http: HttpClient) {
-    this.actualizacionDatosSubject.subscribe((datos: SvgBase[]) => {
-      this.actualizarDatos(datos); // Actualizar la lista con los datos recibidos
-    });
+    // this.actualizacionDatosSubject.subscribe((datos: SvgBase[]) => {
+    //   this.actualizarDatos(datos); // Actualizar la lista con los datos recibidos
+    // });
    }
 
   private elementos: SvgBase[] = [];
   actualizacionDatosSubject = new Subject<SvgBase[]>(); // Emisor de eventos
 
-  async leerLayout(): Promise<SvgBase[]> {
+  async leerJson(): Promise<SvgBase[]> {
     this.elementos = await this.getElementosAlmacenados();
     return this.elementos;
   }
@@ -79,7 +81,7 @@ export class DataService2 implements IpersistenciaSvg {
   }
 
   //Almacen en tiempo real para realizar modificaciones y visualizar los resultados mientras cambian por pantalla
-  leerTiempoReal(): void {
+  leerTiempoReal(): SvgBase[] {
     console.log('leyendo tiempo real')
     setInterval(() => {
       // Simulación de cambios en algunos elementos
@@ -97,6 +99,7 @@ export class DataService2 implements IpersistenciaSvg {
 
       }
     }, 2500); // Ejecutar cada 2.5 segundos (en milisegundos)
+    return this.elementos;
   }
 
   // Método para actualizar datos en la lista existente

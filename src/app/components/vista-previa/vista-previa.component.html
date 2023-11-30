@@ -17,7 +17,7 @@
 <button class="tamaño-boton" (click)="limpiarCanvas()">Limpiar esquema SVG</button>
 <button class="tamaño-boton" (click)="devolverAlmacen()">Log del almacen</button>
 <button class="tamaño-boton" (click)="cargar()">Refrescar datos</button>
-<button class="tamaño-boton" (click)="devolverAlmacenTiempoReal()">Almacen Tiempo Real</button>
+<button class="tamaño-boton" (click)="leerTiempoReal()">Almacen Tiempo Real</button>
 <button class="tamaño-boton" (click)="limpiaInterval()">Parar almacen tiempo real</button>
 <button class="tamaño-boton"
   (click)="crearNuevaFigura(figuraService.crearCuadradoGenerico)">CrearCuadradoGenerico</button>
@@ -61,8 +61,9 @@
 
   <div class="propiedades-figura" *ngIf="objetoSeleccionado">
     <div *ngIf="esLinea(objetoSeleccionado)">
-      <label for="curroSelector">Selecciona el tipo de borde: </label>
-      <select id="curroSelector" [(ngModel)]="tipoBorde" (change)="actualizarEstadoLinea(objetoSeleccionado)">
+      <label for="curroSelector">Selecciona un estado de línea: </label>
+      <select #curroSelector id="curroSelector" aria-label="ej.ConCurro" (change)="actualizarEstadoLinea(objetoSeleccionado, curroSelector.value)">
+        <option value="" disabled selected style="color: gray;">Estado de línea</option>
         <option value="neutral" selected>Neutral</option>
         <option value="10min" selected>Parada 10min</option>
         <option value="30min" selected>Parada 30min</option>
@@ -81,12 +82,13 @@
     <p>Tipo de figura = {{ objetoSeleccionado.name }}</p>
     <p>Coordenada X: <input type="number" [(ngModel)]="objetoSeleccionado.left" /></p>
     <p>Coordebada Y: <input type="number" [(ngModel)]="objetoSeleccionado.top" /></p>
+    <p>stroke: <input type="string" [(ngModel)]="objetoSeleccionado.stroke" /></p>
 
     <p *ngIf="esTexto(objetoSeleccionado)">Tamaño de la Fuente: <input type="number"
         [(ngModel)]="objetoSeleccionado.fontSize" /></p>
     <p *ngIf="esTexto(objetoSeleccionado)">
       Texto representado:
-      <input type="string" [(ngModel)]="objetoSeleccionado.text" />
+      <input type="string" [(ngModel)]="objetoSeleccionado.text" (input)="actualizarTexto(objetoSeleccionado)" />
     </p>
   </div>
   <br>

@@ -3,7 +3,7 @@ import { Formas, SvgBase } from "./svgBase.interface";
 
 export interface IpersistenciaSvg {
   //Operaciones principales para el servicio
-  leerLayout(): Promise<SvgBase[]>;
+  leerJson(): Promise<SvgBase[]>;
   guardarSvg(elementos: SvgBase[]): Promise<SvgBase[]>;
   leerTiempoReal(): void;
 
@@ -11,6 +11,7 @@ export interface IpersistenciaSvg {
   eliminarElemento(elemento: fabric.Object): Observable<any>;
   // Definir el Subject para actualizaciones de datos
   actualizacionDatosSubject: Subject<SvgBase[]>;
+  elementosGestor: Subject<SvgBase[]>
 }
 
 

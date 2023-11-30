@@ -114,7 +114,7 @@ export class FiguraService {
       name: figura.id.toString(),
       opacity: 0.85,
       angle: figura.angle,
-      strokeDashArray: [10, 5],
+      strokeDashArray: [NaN],
     });
 
     linea.on('mousedown', (options) => {
@@ -127,23 +127,6 @@ export class FiguraService {
         this.canvas!.remove(event.target);
       }
     });
-
-    let alternar = false;
-    //animateLine(this.canvas!, lineaAnimacion, figura.x1, figura.x2)
-    setInterval(() => {
-      animate()
-      this.canvas!.renderAll();
-    }, 300)
-
-    function animate() {
-      if (alternar) {
-        linea.strokeDashArray = [7, 5, 14];
-      } else {
-        linea.strokeDashArray = [3, 8, 7];
-      }
-      alternar = !alternar; // Alternar entre true y false
-
-    }
     return linea;
   }
 
