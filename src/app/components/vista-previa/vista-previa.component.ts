@@ -61,7 +61,7 @@ export class VistaPreviaComponent {
           this.figuras = elementos
           this.figurasAlmacen(this.figuras)
         })
-      })
+      });
   }
 
   cargar() {
@@ -75,8 +75,6 @@ export class VistaPreviaComponent {
     await this.actualizarDatos();
     this.canvas!.clear()
     this.figurasAlmacen(this.figuras);
-    //this.asignarEstadoInicialALineas();
-    console.log(this.figuras)
   }
 
   // Método para actualizar en this.figuras la información de los distintos elementos
@@ -85,7 +83,6 @@ export class VistaPreviaComponent {
       setTimeout(async () => {
         const data = await this.dataService.leerJson();
         this.figuras = data;
-        console.log(this.figuras)
         resolve();
       }, 500);
     });
@@ -193,41 +190,8 @@ export class VistaPreviaComponent {
       }
 
       this.forzarActualizacion(modifiedObject)
-
-      let indice = this.figuras.findIndex((modifiedObject) => modifiedObject.name === updatedData[0].id.toString())
-      if (indice !== -1) {
-        // Asignar las propiedades del objeto modificado a this.figuras[indice]
-        const figuraModificada = this.figuras[indice];
-        Object.assign(figuraModificada, updatedData[0]);
-        this.figuras[indice] = figuraModificada;
-      } else {
-        console.error('No se encontró el objeto en this.figuras');
-      }
+      this.actualizarFiguraAlmacen(updatedData);
     });
-  }
-
-  actualizarTextoEnElementoAlmacen(objeto: fabric.Object) {
-    let updatedData = {} as SvgBase[];
-    if (objeto instanceof fabric.Text) {
-      updatedData = this.elementoTexto(objeto);
-    }
-    // Notificar al servicio de eventos sobre la actualización de datos
-    this.dataService.actualizacionDatosSubject.next(updatedData)
-  }
-
-  actualizarLineaEnAlmacen(linea: fabric.Object) {
-    setInterval(() => {
-      //console.log('actualizando linea')
-      let updatedData = {} as SvgBase[];
-      if (linea instanceof fabric.Line) {
-        updatedData = this.elementoLinea(linea);
-      }
-      //console.log(updatedData)
-      // Notificar al servicio de eventos sobre la actualización de datos
-      this.dataService.actualizacionDatosSubject.next(updatedData)
-      this.forzarActualizacionCanvas(linea)   //Hay que forzar la actualización para ver reflejado los cambios por pantalla
-      this.canvas!.renderAll();
-    }, 300)
   }
 
   //Asignamos los valores a la línea
@@ -356,7 +320,10 @@ export class VistaPreviaComponent {
 
   //Modo lectura en tiempo real
   leerTiempoReal() {
-    this.desactivarDragAndDrop()
+    this.dataService.cambioTexto.subscribe(() => {
+      this.desactivarDragAndDrop();
+    });
+    this.desactivarDragAndDrop();
     this.dataService.leerTiempoReal();
   }
 
@@ -368,11 +335,6 @@ export class VistaPreviaComponent {
       this.canvas.selection = false; // Desactivar la selección de múltiples objetos
       this.canvas.renderAll(); // Renderizar el canvas para aplicar los cambios
     }
-  }
-
-  //Desactivamos el almacen en tiempo real
-  limpiaInterval() {
-    if (this.interval) clearInterval(this.interval);
   }
 
   //Busca por ID el objeto que seleccionamos de la lista para mostrarlo activo
@@ -395,6 +357,22 @@ export class VistaPreviaComponent {
     this.actualizarValoresObjetoEnAlmacen(texto);
   }
 
+  actualizarLineaEnAlmacen(linea: fabric.Object) {
+    setInterval(() => {
+      //console.log('actualizando linea')
+      let updatedData = {} as SvgBase[];
+      if (linea instanceof fabric.Line) {
+        updatedData = this.elementoLinea(linea);
+      }
+      //console.log(updatedData)
+      this.forzarActualizacionCanvas(linea)   //Hay que forzar la actualización para ver reflejado los cambios por pantalla
+      this.canvas!.renderAll();
+    }, 150)
+    //this.actualizarFiguraAlmacen(updatedData)
+
+  }
+
+
   //Modificar el color
   actualizarColor(event: any) {
     if (this.canvas && this.objetoSeleccionado) {
@@ -403,7 +381,6 @@ export class VistaPreviaComponent {
       }
         this.forzarActualizacionCanvas(this.objetoSeleccionado);//Para ver el nuevo color necesitamos hacer una actualización (forzosa?)
         this.actualizarValoresObjetoEnAlmacen(this.objetoSeleccionado);
-
     }
   }
 
@@ -432,16 +409,21 @@ export class VistaPreviaComponent {
       console.log('cuadrado')
       updatedData = this.elementoCuadrado(objeto);
     }
-
     //Asignamos los valores de actualización al objeto
     //! Ya que el método principal funciona con object:modified pero cuando cambias el color no salta el evento por lo que tenemos este método
+    this.actualizarFiguraAlmacen(updatedData);
+  }
+
+  actualizarFiguraAlmacen(updatedData: SvgBase[]) {
     const index = this.figuras.findIndex((figura) => figura.id === updatedData[0].id);
     if (index !== -1) {
       // Actualiza los datos en this.figuras
       this.figuras[index] = updatedData[0];
     } else {
       console.error('El objeto no se encontró en this.figuras');
+      this.figuras.push(updatedData[0])
     }
+    console.log(this.figuras)
   }
 
   // Forzamos la actualización del color para verlo reflejado en el canvas reduciendo el tamaño del objeto a modificar
@@ -455,7 +437,9 @@ export class VistaPreviaComponent {
   //Devuelve por consola el string para el SVG y lo guarda en el back
   persistirSVG() {
     console.log(this.figuras);
-    this.dataService.guardarSvg(this.figuras);  //hace la petición con el back para guardar los distintos elementos en un json
+    this.dataService.guardarSvg(this.figuras)  //hace la petición con el back para guardar los distintos elementos en un json
+    .then((aver) => console.log('mu bien', aver))
+    .catch(error => console.error('Algo mal', error))
 
     // Crear un nuevo elemento canvas temporal para la exportación
     if (this.canvas) {
@@ -515,9 +499,7 @@ export class VistaPreviaComponent {
     if (index !== -1) {
       console.log(index)
       this.figuras.splice(index, 1);
-      //this.reajustarIDs();
       this.canvas!.renderAll();
-      // console.log(this.figuras)
     }
     this.dataService.eliminarElemento(objetoSeleccionado).subscribe();
   }
@@ -592,7 +574,6 @@ export class VistaPreviaComponent {
       this.intervaloAnimacion(linea)
     } else this.limpiarEstado(linea)
 
-    this.actualizarColor(linea)
     // Renderizar el canvas para reflejar los cambios
     this.canvas!.renderAll();
   }

@@ -1,5 +1,6 @@
 import { Observable, Subject } from "rxjs";
 import { Formas, SvgBase } from "./svgBase.interface";
+import { EventEmitter } from "@angular/core";
 
 export interface IpersistenciaSvg {
   //Operaciones principales para el servicio
@@ -9,9 +10,11 @@ export interface IpersistenciaSvg {
 
   //Operaciones secundarias
   eliminarElemento(elemento: fabric.Object): Observable<any>;
+
   // Definir el Subject para actualizaciones de datos
-  actualizacionDatosSubject: Subject<SvgBase[]>;
-  elementosGestor: Subject<SvgBase[]>
+  elementosGestor: Subject<SvgBase[]>;
+
+  cambioTexto: EventEmitter<void>;
 }
 
 

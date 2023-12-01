@@ -1,4 +1,4 @@
-import { Injectable, OnInit } from '@angular/core';
+import { EventEmitter, Injectable, OnInit } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { BehaviorSubject, Observable, Subject, catchError, from, mergeMap, of, toArray } from 'rxjs';
 import { SvgBase } from '../interfaces/svgBase.interface';
@@ -22,6 +22,7 @@ export class DataService2 implements IpersistenciaSvg {
 
   private elementos: SvgBase[] = [];
   actualizacionDatosSubject = new Subject<SvgBase[]>(); // Emisor de eventos
+  public cambioTexto = new EventEmitter<void>();
 
   async leerJson(): Promise<SvgBase[]> {
     this.elementos = await this.getElementosAlmacenados();

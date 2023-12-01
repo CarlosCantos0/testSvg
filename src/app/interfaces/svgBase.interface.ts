@@ -2,6 +2,8 @@ export type Formas = '' | 'rect' | 'text' | 'line'
 //export type Fuentes = 'Arial' | 'sans-serif' | 'serif' | 'monospace' | 'Times New Roman' | '';
 export type estadoBorde = '' | 'neutral' | '30min' | '10min' | 'sinCurro' | 'conCurro'
 
+
+//IndexZ va por posición de la lista de las figuras
 export interface SvgBase {
   rellenado: boolean;
   id: number;

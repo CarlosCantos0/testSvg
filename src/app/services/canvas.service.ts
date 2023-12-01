@@ -19,7 +19,7 @@ export class CanvasService {
       width: 1400, // Ancho en píxeles
       height: 800, // Alto en píxeles
       backgroundColor: 'white', // Color de fondo del lienzo
-      selection: true, // Habilita la selección de objetos
+      selection: false, // Habilita la selección de objetos
       selectionBorderColor: 'blue', // Color del borde de selección
       selectionLineWidth: 1, // Ancho del borde de selección
     });

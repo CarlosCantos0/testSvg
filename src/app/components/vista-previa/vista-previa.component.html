@@ -18,7 +18,6 @@
 <button class="tamaño-boton" (click)="devolverAlmacen()">Log del almacen</button>
 <button class="tamaño-boton" (click)="cargar()">Refrescar datos</button>
 <button class="tamaño-boton" (click)="leerTiempoReal()">Almacen Tiempo Real</button>
-<button class="tamaño-boton" (click)="limpiaInterval()">Parar almacen tiempo real</button>
 <button class="tamaño-boton"
   (click)="crearNuevaFigura(figuraService.crearCuadradoGenerico)">CrearCuadradoGenerico</button>
 <button class="tamaño-boton" (click)="crearNuevaFigura(figuraService.crearLineaGenerica)">Crear Línea</button>
@@ -82,7 +81,6 @@
     <p>Tipo de figura = {{ objetoSeleccionado.name }}</p>
     <p>Coordenada X: <input type="number" [(ngModel)]="objetoSeleccionado.left" /></p>
     <p>Coordebada Y: <input type="number" [(ngModel)]="objetoSeleccionado.top" /></p>
-    <p>stroke: <input type="string" [(ngModel)]="objetoSeleccionado.stroke" /></p>
 
     <p *ngIf="esTexto(objetoSeleccionado)">Tamaño de la Fuente: <input type="number"
         [(ngModel)]="objetoSeleccionado.fontSize" /></p>

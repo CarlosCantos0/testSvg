@@ -1,4 +1,4 @@
-import { Injectable, OnInit } from '@angular/core';
+import { EventEmitter, Injectable, OnInit } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { BehaviorSubject, Observable, Subject, catchError, from, mergeMap, of, toArray } from 'rxjs';
 import { SvgBase } from '../interfaces/svgBase.interface';
@@ -10,7 +10,7 @@ import { fabric } from 'fabric';
 })
 export class DataService implements IpersistenciaSvg {
 
-  private baseUrl = 'http://localhost:3000';
+  private baseUrl = 'http://localhost:3001';
 
   constructor(private http: HttpClient) {
     this.elementosGestor.subscribe(elementos => this.elementos = elementos)
@@ -18,7 +18,7 @@ export class DataService implements IpersistenciaSvg {
 
   private elementos: SvgBase[] = [];
   public elementosGestor: Subject<SvgBase[]> = new Subject<SvgBase[]>
-  actualizacionDatosSubject = new Subject<SvgBase[]>(); // Emisor de eventos
+  public cambioTexto = new EventEmitter<void>();
 
   async leerJson(): Promise<SvgBase[]> {
     return await this.getElementosAlmacenados();
@@ -36,13 +36,9 @@ export class DataService implements IpersistenciaSvg {
       })
     };
 
-    try {
-      await this.actualizarElementos(elementos, httpOptions)
+
+      return this.actualizarElementos(elementos, httpOptions)
         .toPromise();
-      return 'Elementos actualizados exitosamente';
-    } catch (error) {
-      throw new Error('Error al actualizar elementos: ' + error);
-    }
   }
 
   //Elimina la referencia de mi backend
@@ -59,26 +55,8 @@ export class DataService implements IpersistenciaSvg {
   //Cuando le damos a guardar, actualizamos los elementos existentes posteamos los demás
   private actualizarElementos(elementos: SvgBase[], httpOptions: any): Observable<any> {
     console.log('actualizar elementos');
-
-    return from(elementos).pipe(
-      mergeMap(elemento =>
-        this.http.get(`${this.baseUrl}/FigurasData/${elemento.id}`).pipe(
-          catchError(() => of(null)) // Manejamos el error si el elemento no existe
-        ).pipe(
-          mergeMap(existingElement => {
-            if (existingElement) {
-              // El elemento existe, realiza un PATCH
-              return this.http.patch(`${this.baseUrl}/FigurasData/${elemento.id}`, elemento, httpOptions);
-            } else {
-              console.log(elemento)
-              // El elemento no existe, realiza un POST
-              return this.http.post(`${this.baseUrl}/FigurasData`, elemento, httpOptions);
-            }
-          })
-        )
-      ),
-      toArray()
-    );
+    console.log(elementos)
+    return this.http.post(`${this.baseUrl}/FigurasData`, elementos ,httpOptions);
   }
 
   //Almacen en tiempo real para realizar modificaciones y visualizar los resultados mientras cambian por pantalla
@@ -86,7 +64,7 @@ export class DataService implements IpersistenciaSvg {
     let iteraciones: number = 0
 
     console.log('leyendo tiempo real')
-    this.leerJson()
+    this.leerJson() //Leemos lo que tenemos guardado en nuestra BBDD y luego lo modificamos y se muestra en el lienzo
       .then(elementos => {
 
         setInterval(async () => {
@@ -107,16 +85,12 @@ export class DataService implements IpersistenciaSvg {
             if (iteraciones == 12) {
               elementos[0].text = 'dani master in Angular'
             }
-
             iteraciones++;
-            this.setElementos(elementos)
+            this.setElementos(elementos);
+            this.cambioTexto.emit(); // Emitir el evento cuando cambia el valor del texto
           }
-
         }, 2500);
-
       });
-      console.log(iteraciones)
-    // Ejecutar cada 2.5 segundos (en milisegundos)
   }
 
   // Método para actualizar datos en la lista existente
@@ -143,10 +117,5 @@ export class DataService implements IpersistenciaSvg {
           resolve(elementos)
         })
     })
-  }
-
-  // Método para recibir actualizaciones
-  recibirActualizacionDatos(): Observable<SvgBase[]> {
-    return this.actualizacionDatosSubject.asObservable();
   }
 }
