@@ -191,6 +191,7 @@ export class VistaPreviaComponent {
 
       this.forzarActualizacion(modifiedObject)
       this.actualizarFiguraAlmacen(updatedData);
+      console.log(this.figuras);
     });
   }
 
@@ -365,11 +366,10 @@ export class VistaPreviaComponent {
         updatedData = this.elementoLinea(linea);
       }
       //console.log(updatedData)
+      this.actualizarFiguraAlmacen(updatedData)
       this.forzarActualizacionCanvas(linea)   //Hay que forzar la actualización para ver reflejado los cambios por pantalla
       this.canvas!.renderAll();
     }, 150)
-    //this.actualizarFiguraAlmacen(updatedData)
-
   }
 
 
@@ -423,7 +423,6 @@ export class VistaPreviaComponent {
       console.error('El objeto no se encontró en this.figuras');
       this.figuras.push(updatedData[0])
     }
-    console.log(this.figuras)
   }
 
   // Forzamos la actualización del color para verlo reflejado en el canvas reduciendo el tamaño del objeto a modificar

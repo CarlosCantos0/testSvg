@@ -10,7 +10,7 @@ import { fabric } from 'fabric';
 })
 export class DataService implements IpersistenciaSvg {
 
-  private baseUrl = 'http://localhost:3001';
+  private baseUrl = 'http://localhost:3000';
 
   constructor(private http: HttpClient) {
     this.elementosGestor.subscribe(elementos => this.elementos = elementos)
@@ -55,10 +55,29 @@ export class DataService implements IpersistenciaSvg {
   //Cuando le damos a guardar, actualizamos los elementos existentes posteamos los demás
   private actualizarElementos(elementos: SvgBase[], httpOptions: any): Observable<any> {
     console.log('actualizar elementos');
-    console.log(elementos)
-    return this.http.post(`${this.baseUrl}/FigurasData`, elementos ,httpOptions);
+
+    return from(elementos).pipe(
+      mergeMap(elemento =>
+        this.http.get(`${this.baseUrl}/FigurasData/${elemento.id}`).pipe(
+          catchError(() => of(null)) // Manejamos el error si el elemento no existe
+        ).pipe(
+          mergeMap(existingElement => {
+            if (existingElement) {
+              // El elemento existe, realiza un PATCH
+              return this.http.patch(`${this.baseUrl}/FigurasData/${elemento.id}`, elemento, httpOptions);
+            } else {
+              console.log(elemento)
+              // El elemento no existe, realiza un POST
+              return this.http.post(`${this.baseUrl}/FigurasData`, elemento, httpOptions);
+            }
+          })
+        )
+      ),
+      toArray()
+    );
   }
 
+  //! FALTA DESACTIVAR EL CANVAS CUANDO ESTAMOS EN TIEMPO REAL DE LECTURA
   //Almacen en tiempo real para realizar modificaciones y visualizar los resultados mientras cambian por pantalla
   leerTiempoReal(): void {
     let iteraciones: number = 0
