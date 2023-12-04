@@ -23,7 +23,7 @@ export interface LineCodoMap {
 export class VistaPreviaComponent {
 
   estadoBorde: string = 'neutral'
-  nombrePersonalizado: string = 'figura 1'
+  nombrePersonalizado1: string = 'figura 1'
 
   @ViewChild('canvasEl') canvasEl!: ElementRef<HTMLCanvasElement>;
   @ViewChild(MatMenuTrigger) contextMenu!: MatMenuTrigger;
@@ -581,6 +581,7 @@ export class VistaPreviaComponent {
     this.canvas!.renderAll();
   }
 
+  //Alerna entre diferentes estados para indicar a la línea
   private alterarEstadoLinea(linea: fabric.Object, estadoBorde: string): void {
     let alternar: boolean = false;
     if (linea instanceof fabric.Line) {
@@ -608,27 +609,31 @@ export class VistaPreviaComponent {
     }
   }
 
+  //Define el intervalo en el que se llama a la animacion de la linea
   intervaloAnimacion(linea: fabric.Object) {
     this.almacenIntervalos[linea.name!] = setInterval(() => {
       this.animate(linea)
       this.canvas!.renderAll();
-    }, 500)
+    }, 300)
   }
 
+  //Define la animacion de la linea
   animate(linea: fabric.Object) {
     if (linea.strokeDashArray![0] === 7) {
-      linea.strokeDashArray = [3, 8, 7];
+      linea.strokeDashArray = [5, 7, 5];
     } else {
-      linea.strokeDashArray = [7, 5, 14];
+      linea.strokeDashArray = [7, 5, 7];
     }
   }
 
+  //Limpia la animacion para cuando le asignamos otro estado que no es el de 'conCurro'
   limpiarEstado(linea: fabric.Object) {
     clearInterval(this.almacenIntervalos[linea.name!]); // Detener la animación
   }
 
+  //Le podemos asignar un nombre personalizado a nuestras figuras
   cambiarNombrePersonalizado(figuraParam: fabric.Object, nombre: string) {
     const index = this.figuras.findIndex(figura => figura.id === parseFloat(figuraParam.name!));
-    this.figuras[index].nombrePersonalizado = this.nombrePersonalizado;
+    this.figuras[index].nombrePersonalizado = nombre;
   }
 }
