@@ -28,5 +28,6 @@ export interface SvgBase {
   scaleY: number;
   angle: number;
   strokeDashArray: number[],
-  estadoBorde: estadoBorde
+  estadoBorde: estadoBorde,
+  nombrePersonalizado: string
 }

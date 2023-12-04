@@ -35,13 +35,11 @@ export class DataService implements IpersistenciaSvg {
         'Content-Type': 'application/json' // Agregar el encabezado Content-Type: application/json
       })
     };
-
-
-      return this.actualizarElementos(elementos, httpOptions)
-        .toPromise();
+    return this.actualizarElementos(elementos, httpOptions)
+      .toPromise();
   }
 
-  //Elimina la referencia de mi backend
+  //Elimina la referencia del Back
   eliminarElemento(elemento: fabric.Object): Observable<any> {
     const httpOptions = {
       headers: new HttpHeaders({
@@ -55,7 +53,6 @@ export class DataService implements IpersistenciaSvg {
   //Cuando le damos a guardar, actualizamos los elementos existentes posteamos los demás
   private actualizarElementos(elementos: SvgBase[], httpOptions: any): Observable<any> {
     console.log('actualizar elementos');
-
     return from(elementos).pipe(
       mergeMap(elemento =>
         this.http.get(`${this.baseUrl}/FigurasData/${elemento.id}`).pipe(
@@ -77,7 +74,6 @@ export class DataService implements IpersistenciaSvg {
     );
   }
 
-  //! FALTA DESACTIVAR EL CANVAS CUANDO ESTAMOS EN TIEMPO REAL DE LECTURA
   //Almacen en tiempo real para realizar modificaciones y visualizar los resultados mientras cambian por pantalla
   leerTiempoReal(): void {
     let iteraciones: number = 0
@@ -113,20 +109,20 @@ export class DataService implements IpersistenciaSvg {
   }
 
   // Método para actualizar datos en la lista existente
-  private actualizarDatos(datosActualizados: SvgBase[]): void {
+  // private actualizarDatos(datosActualizados: SvgBase[]): void {
 
-    datosActualizados.forEach((nuevoDato: SvgBase) => {
-      const elementoExistente = this.elementos.find(elemento => elemento.id == nuevoDato.id);
-      if (elementoExistente) {
-        // Actualizar propiedades del elemento existente con los valores del nuevo dato
-        Object.assign(elementoExistente, nuevoDato);
-      } else {
-        // Si el elemento no existe en la lista actual, se puede agregar si es necesario
-        this.elementos.push(nuevoDato);
-      }
-      //console.log(this.elementos)
-    });
-  }
+  //   datosActualizados.forEach((nuevoDato: SvgBase) => {
+  //     const elementoExistente = this.elementos.find(elemento => elemento.id == nuevoDato.id);
+  //     if (elementoExistente) {
+  //       // Actualizar propiedades del elemento existente con los valores del nuevo dato
+  //       Object.assign(elementoExistente, nuevoDato);
+  //     } else {
+  //       // Si el elemento no existe en la lista actual, se puede agregar si es necesario
+  //       this.elementos.push(nuevoDato);
+  //     }
+  //     //console.log(this.elementos)
+  //   });
+  // }
 
   //Devuelve todos los elementos que existen en nuestra bbdd
   getElementosAlmacenados(): Promise<SvgBase[]> {

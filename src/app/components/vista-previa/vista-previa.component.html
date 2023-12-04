@@ -1,8 +1,3 @@
-<div class="canvas-container">
-  <canvas #canvasEl id="canvas"></canvas>
-  <div *ngIf="esLinea(objetoSeleccionado!)" class="dashed-line"></div>
-</div>
-
 <mat-menu #contextMenu="matMenu">
   <button mat-menu-item (click)="traerAlFrente()">Traer al frente</button>
   <button mat-menu-item (click)="llevarAlFondo()">Llevar al fondo</button>
@@ -12,83 +7,104 @@
 
 <br>
 
-
-<button class="tamaño-boton" (click)="persistirSVG()">Persistir SVG</button>
-<button class="tamaño-boton" (click)="limpiarCanvas()">Limpiar esquema SVG</button>
-<button class="tamaño-boton" (click)="devolverAlmacen()">Log del almacen</button>
-<button class="tamaño-boton" (click)="cargar()">Refrescar datos</button>
-<button class="tamaño-boton" (click)="leerTiempoReal()">Almacen Tiempo Real</button>
-<button class="tamaño-boton"
-  (click)="crearNuevaFigura(figuraService.crearCuadradoGenerico)">CrearCuadradoGenerico</button>
-<button class="tamaño-boton" (click)="crearNuevaFigura(figuraService.crearLineaGenerica)">Crear Línea</button>
-<button class="tamaño-boton" (click)="crearNuevaFigura(figuraService.crearTextoGenerico)">Crear Texto</button>
-
-
 <div class="contenedor">
-  <mat-list class="figuras-list">
-    <div mat-subheader>
-      <h2>Cuadrados</h2>
-    </div>
-    <mat-list-item *ngFor="let figura of getFigurasPorTipo('rect'); let i = index"
-      (click)="seleccionarFiguraLista(figura!)">
-      <button mat-raised-button color="primary" class="tamaño-lista">
-        Cuadrado {{ i + 1 }}
-      </button>
-    </mat-list-item>
+  <div class="sidebar">
+    <mat-list class="figuras-list">
+      <div mat-subheader>
+        <h2>Cuadrados</h2>
+      </div>
+      <mat-list-item *ngFor="let figura of getFigurasPorTipo('rect'); let i = index"
+        (click)="seleccionarFiguraLista(figura!)">
+        <button mat-raised-button color="primary" class="tamaño-lista">
+          Cuadrado {{ i + 1 }}
+        </button>
+      </mat-list-item>
 
-    <div mat-subheader>
-      <h2>Líneas</h2>
-    </div>
-    <mat-list-item *ngFor="let figura of getFigurasPorTipo('line'); let i = index"
-      (click)="seleccionarFiguraLista(figura!)">
-      <button mat-raised-button color="primary" class="tamaño-lista">
-        Línea {{ i + 1 }}
-      </button>
-    </mat-list-item>
+      <div mat-subheader>
+        <h2>Líneas</h2>
+      </div>
+      <mat-list-item *ngFor="let figura of getFigurasPorTipo('line'); let i = index"
+        (click)="seleccionarFiguraLista(figura!)">
+        <button mat-raised-button color="primary" class="tamaño-lista">
+          Línea {{ i + 1 }}
+        </button>
+      </mat-list-item>
 
-    <div mat-subheader>
-      <h2>Texto</h2>
-    </div>
-    <mat-list-item *ngFor="let figura of getFigurasPorTipo('text'); let i = index"
-      (click)="seleccionarFiguraLista(figura!)">
-      <button mat-raised-button color="primary" class="tamaño-lista">
-        Texto {{ i + 1 }}
-      </button>
-    </mat-list-item>
-  </mat-list>
+      <div mat-subheader>
+        <h2>Texto</h2>
+      </div>
+      <mat-list-item *ngFor="let figura of getFigurasPorTipo('text'); let i = index"
+        (click)="seleccionarFiguraLista(figura!)">
+        <button mat-raised-button color="primary" class="tamaño-lista">
+          Texto {{ i + 1 }}
+        </button>
+      </mat-list-item>
+    </mat-list>
 
 
-  <div class="propiedades-figura" *ngIf="objetoSeleccionado">
-    <div *ngIf="esLinea(objetoSeleccionado)">
-      <label for="curroSelector">Selecciona un estado de línea: </label>
-      <select #curroSelector id="curroSelector" aria-label="ej.ConCurro" (change)="actualizarEstadoLinea(objetoSeleccionado, curroSelector.value)">
-        <option value="" disabled selected style="color: gray;">Estado de línea</option>
-        <option value="neutral" selected>Neutral</option>
-        <option value="10min" selected>Parada 10min</option>
-        <option value="30min" selected>Parada 30min</option>
-        <option value="conCurro" selected>Con curro</option>
-        <option value="sinCurro" selected>Sin curro</option>
-      </select>
-    </div>
+    <div class="propiedades-figura" *ngIf="objetoSeleccionado">
+      <div *ngIf="esLinea(objetoSeleccionado)">
+        <label for="curroSelector">Selecciona un estado de línea: </label>
+        <select #curroSelector id="curroSelector" aria-label="ej.ConCurro"
+          (change)="actualizarEstadoLinea(objetoSeleccionado, curroSelector.value)">
+          <option value="" disabled selected style="color: gray;">Estado de línea</option>
+          <option value="neutral" selected>Neutral</option>
+          <option value="10min" selected>Parada 10min</option>
+          <option value="30min" selected>Parada 30min</option>
+          <option value="conCurro" selected>Con curro</option>
+          <option value="sinCurro" selected>Sin curro</option>
+        </select>
+      </div>
 
-    <div *ngIf="!esLinea(objetoSeleccionado)">
-      <label for="color">Selecciona el color del relleno: </label>
-      <input type="color" id="color" [value]="objetoSeleccionado!.fill" (change)="actualizarColor($event)" />
+      <div *ngIf="!esLinea(objetoSeleccionado)">
+        <label for="color">Selecciona el color del relleno: </label>
+        <input type="color" id="color" [value]="objetoSeleccionado!.fill" (change)="actualizarColor($event)" />
+        <br>
+        <label for="color">Selecciona el color del borde: </label>
+        <input type="color" id="color" [value]="objetoSeleccionado!.stroke" (change)="actualizarColorBorde($event)" />
+      </div>
       <br>
-      <label for="color">Selecciona el color del borde: </label>
-      <input type="color" id="color" [value]="objetoSeleccionado!.stroke" (change)="actualizarColorBorde($event)" />
-    </div>
-    <p>Tipo de figura = {{ objetoSeleccionado.name }}</p>
-    <p>Coordenada X: <input type="number" [(ngModel)]="objetoSeleccionado.left" /></p>
-    <p>Coordebada Y: <input type="number" [(ngModel)]="objetoSeleccionado.top" /></p>
+      <mat-form-field appearance="outline">
+        <mat-label>CoordX</mat-label>
+        <input matInput type="number" [(ngModel)]="objetoSeleccionado.left">
+      </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>CoordY</mat-label>
+        <input matInput  type="number" [(ngModel)]="objetoSeleccionado.top" >
+      </mat-form-field>
 
-    <p *ngIf="esTexto(objetoSeleccionado)">Tamaño de la Fuente: <input type="number"
-        [(ngModel)]="objetoSeleccionado.fontSize" /></p>
-    <p *ngIf="esTexto(objetoSeleccionado)">
-      Texto representado:
-      <input type="string" [(ngModel)]="objetoSeleccionado.text" (input)="actualizarTexto(objetoSeleccionado)" />
-    </p>
+      <p *ngIf="esTexto(objetoSeleccionado)">Tamaño de la Fuente: <input type="number"
+          [(ngModel)]="objetoSeleccionado.fontSize" /></p>
+      <p *ngIf="esTexto(objetoSeleccionado)">
+        Texto representado:
+        <input type="string" [(ngModel)]="objetoSeleccionado.text" (input)="actualizarTexto(objetoSeleccionado)" />
+      </p>
+      <mat-form-field appearance="outline">
+        <mat-label>Nombre</mat-label>
+        <input matInput type="text" #nombrePersonalizado (input)="cambiarNombrePersonalizado(objetoSeleccionado, nombrePersonalizado.value)">
+      </mat-form-field>
+    </div>
   </div>
+
+
+
+  <div class="canvas-container">
+    <canvas #canvasEl id="canvas"></canvas>
+    <div *ngIf="esLinea(objetoSeleccionado!)" class="dashed-line"></div>
+  </div>
+  <div class="botones">
+  <button class="tamaño-boton" (click)="persistirSVG()">Persistir SVG</button>
+  <button class="tamaño-boton" (click)="limpiarCanvas()">Limpiar esquema SVG</button>
+  <button class="tamaño-boton" (click)="devolverAlmacen()">Log del almacen</button>
+  <button class="tamaño-boton" (click)="cargar()">Refrescar datos</button>
+  <button class="tamaño-boton" (click)="leerTiempoReal()">Almacen Tiempo Real</button>
+  <button class="tamaño-boton"
+    (click)="crearNuevaFigura(figuraService.crearCuadradoGenerico)">CrearCuadradoGenerico</button>
+  <button class="tamaño-boton" (click)="crearNuevaFigura(figuraService.crearLineaGenerica)">Crear Línea</button>
+  <button class="tamaño-boton" (click)="crearNuevaFigura(figuraService.crearTextoGenerico)">Crear Texto</button>
+  <br>
+  <br>
   <br>
   <input type="file" (change)="handleFileInput($event)" accept=".svg" />
+</div>
 </div>

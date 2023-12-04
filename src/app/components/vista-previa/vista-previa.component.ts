@@ -23,6 +23,7 @@ export interface LineCodoMap {
 export class VistaPreviaComponent {
 
   estadoBorde: string = 'neutral'
+  nombrePersonalizado: string = 'figura 1'
 
   @ViewChild('canvasEl') canvasEl!: ElementRef<HTMLCanvasElement>;
   @ViewChild(MatMenuTrigger) contextMenu!: MatMenuTrigger;
@@ -226,7 +227,8 @@ export class VistaPreviaComponent {
       fonts: '',
       angle: NaN,
       strokeDashArray: modifiedObject.strokeDashArray,
-      estadoBorde: modifiedObject.estadoBorde
+      estadoBorde: modifiedObject.estadoBorde,
+      nombrePersonalizado: ''
     }];
   }
 
@@ -256,7 +258,8 @@ export class VistaPreviaComponent {
       scaleY: modifiedObject.scaleY!,
       angle: modifiedObject.angle!,
       strokeDashArray: modifiedObject.strokeDashArray!,
-      estadoBorde: ''
+      estadoBorde: '',
+      nombrePersonalizado: ''
     }];
   }
 
@@ -287,7 +290,8 @@ export class VistaPreviaComponent {
       name: modifiedObject.name!,
       angle: modifiedObject.angle!,
       strokeDashArray: modifiedObject.strokeDashArray!,
-      estadoBorde: ''
+      estadoBorde: '',
+      nombrePersonalizado: ''
     }];
   }
 
@@ -321,7 +325,7 @@ export class VistaPreviaComponent {
 
   //Modo lectura en tiempo real
   leerTiempoReal() {
-    this.dataService.cambioTexto.subscribe(() => {
+    this.dataService.cambioTexto.subscribe(() => {  //Event Emitter para informar sobre el cambio
       this.desactivarDragAndDrop();
     });
     this.desactivarDragAndDrop();
@@ -608,7 +612,7 @@ export class VistaPreviaComponent {
     this.almacenIntervalos[linea.name!] = setInterval(() => {
       this.animate(linea)
       this.canvas!.renderAll();
-    }, 300)
+    }, 500)
   }
 
   animate(linea: fabric.Object) {
@@ -621,5 +625,10 @@ export class VistaPreviaComponent {
 
   limpiarEstado(linea: fabric.Object) {
     clearInterval(this.almacenIntervalos[linea.name!]); // Detener la animación
+  }
+
+  cambiarNombrePersonalizado(figuraParam: fabric.Object, nombre: string) {
+    const index = this.figuras.findIndex(figura => figura.id === parseFloat(figuraParam.name!));
+    this.figuras[index].nombrePersonalizado = this.nombrePersonalizado;
   }
 }

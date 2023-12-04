@@ -1,7 +1,23 @@
 .contenedor {
-  position: relative;
-  width: 100%; /* Ajustar al tamaño deseado */
-  height: 500px; /* Ajustar al tamaño deseado */
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  width: 100%;
+  /* Ajustar al tamaño deseado */
+}
+
+.sidebar {
+  display: flex;
+  flex-wrap: wrap;
+  width: 300px;
+  /* Ocupa 1/4 del ancho */
+  min-width: 200px;
+  /* Ancho mínimo para la barra lateral */
+  max-width: 25%;
+  /* Ancho máximo para la barra lateral */
+  padding: 10px;
+  box-sizing: border-box;
+  align-content: flex-start;
 }
 
 ul {
@@ -11,51 +27,55 @@ ul {
 }
 
 .figuras-list {
-  position: absolute !important;
-  top: -750px !important;
-  right: 50px !important;
-  background-color: rgb(0, 238, 255); /* Color de fondo si es necesario */
-  border: 1px solid #ccc; /* Borde si es necesario */
-  border-radius: 5px; /* Borde redondeado si es necesario */
-  max-height: 220px; /* Altura máxima con margen superior e inferior */
-  overflow-y: auto; /* Agregar barra de desplazamiento vertical si es necesario */
-  z-index: 1; /* Asegurarse de que esté por encima del canvas u otros elementos */
-  width: 200px;
+  background-color: rgb(0, 238, 255);
+  /* Color de fondo si es necesario */
+  border: 1px solid #ccc;
+  /* Borde si es necesario */
+  border-radius: 5px;
+  /* Borde redondeado si es necesario */
+  max-height: 450px;
+  /* Altura máxima con margen superior e inferior */
+  overflow-y: auto;
+  /* Agregar barra de desplazamiento vertical si es necesario */
+  z-index: 1;
+  /* Asegurarse de que esté por encima del canvas u otros elementos */
+  width: 100%;
 }
 
 .propiedades-figura {
-  position: absolute !important;
-  top: -500px !important;
-  right: 50px !important;
+  margin-top: 10px;
   background-color: #fff;
-  padding: 5px;
   border: 1px solid #ccc;
   border-radius: 5px;
+  max-height: 400px;
+  z-index: 1;
+  width: 100%;
+  padding: 10px;
 }
 
 .tamaño-boton {
-  font-size: 20px; /* Ajusta el tamaño de la fuente */
+  font-size: 20px;
+  /* Ajusta el tamaño de la fuente */
   padding: 15px 30px;
   margin-left: 10px;
   margin-top: 5px;
 }
 
 .tamaño-lista {
-  font-size: 15px; /* Ajusta el tamaño de la fuente */
+  font-size: 15px;
+  /* Ajusta el tamaño de la fuente */
   padding: 10px 15px;
   margin-top: 3px;
-  width: 100%; /* Opcional: Ajusta el ancho de los botones */
+  width: 100%;
+  /* Opcional: Ajusta el ancho de los botones */
 }
 
 .canvas-container {
-  border: 2px solid #ccc; /* Añadir un borde al contenedor */
-  border-radius: 5px; /* Añadir bordes redondeados */
-  box-shadow: 0 0 5px rgba(0, 0, 0, 0.1); /* Añadir sombra para resaltar el canvas */
-  width: 1400px; /* Ajustar el ancho del contenedor según sea necesario */
-  height: 800px; /* Ajustar la altura del contenedor según sea necesario */
-  display: flex; /* Usar flexbox para centrar el canvas */
-  justify-content: center; /* Centrar horizontalmente */
-  align-items: center; /* Centrar verticalmente */
+  flex: 1;
+  width: 100%;
+  /* Ajustar el ancho del contenedor según sea necesario */
+  display: flex;
+  /* Usar flexbox para centrar el canvas */
   margin-top: 10px;
   margin-left: 10px;
 }
@@ -63,33 +83,13 @@ ul {
 canvas {
   /* Estilos adicionales para el canvas */
   display: block;
-  max-width: 100%; /* Para asegurar que el canvas no se desborde del contenedor */
-}
-
-.dashed-line {
-  position: absolute;
-  top: 0;
-  left: 0;
   width: 100%;
-  height: 100%;
-  pointer-events: none; /* Para permitir eventos debajo */
-  z-index: 999999; /* Asegura que esté encima del canvas */
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.7);
+  border-radius: 5px;
+  border: 2px solid #ccc;
 }
 
-.dashed-line::before {
-  content: "";
-  position: absolute;
-  height: 2px; /* Altura de la línea */
-  width: 100%; /* Ancho de la línea */
-  border-top: 2px dashed transparent; /* Línea punteada transparente */
-  animation: dash 2s linear infinite; /* Animación 'dash' de 2 segundos, lineal e infinita */
-}
-
-@keyframes dash {
-  from {
-    background-position: 0; /* Posición inicial de la animación */
-  }
-  to {
-    background-position: 10px; /* Posición final de la animación */
-  }
+.botones {
+  width: 100%;
+  margin-top: 5px;
 }
