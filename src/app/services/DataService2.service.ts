@@ -10,7 +10,7 @@ import { fabric } from 'fabric';
 })
 export class DataService2 implements IpersistenciaSvg {
 
-  private baseUrl = 'http://localhost:3000';
+  private baseUrl = 'https://localhost:44387';
 
   public elementosGestor: Subject<SvgBase[]> = new Subject<SvgBase[]>
 
@@ -19,6 +19,18 @@ export class DataService2 implements IpersistenciaSvg {
     //   this.actualizarDatos(datos); // Actualizar la lista con los datos recibidos
     // });
    }
+  setId(id: number): void {
+    throw new Error('Method not implemented.');
+  }
+  getId(): Observable<number> {
+    throw new Error('Method not implemented.');
+  }
+  devolverId(): number {
+    throw new Error('Method not implemented.');
+  }
+  idEsquema(id: number): number {
+    throw new Error('Method not implemented.');
+  }
 
   private elementos: SvgBase[] = [];
   actualizacionDatosSubject = new Subject<SvgBase[]>(); // Emisor de eventos
@@ -62,13 +74,13 @@ export class DataService2 implements IpersistenciaSvg {
 
     return from(elementos).pipe(
       mergeMap(elemento =>
-        this.http.get(`${this.baseUrl}/FigurasData/${elemento.id}`).pipe(
+        this.http.get(`${this.baseUrl}/FigurasData/${elemento.idElemento}`).pipe(
           catchError(() => of(null)) // Manejamos el error si el elemento no existe
         ).pipe(
           mergeMap(existingElement => {
             if (existingElement) {
               // El elemento existe, realiza un PATCH
-              return this.http.patch(`${this.baseUrl}/FigurasData/${elemento.id}`, elemento, httpOptions);
+              return this.http.patch(`${this.baseUrl}/FigurasData/${elemento.idElemento}`, elemento, httpOptions);
             } else {
               console.log(elemento)
               // El elemento no existe, realiza un POST
@@ -106,7 +118,7 @@ export class DataService2 implements IpersistenciaSvg {
   // Método para actualizar datos en la lista existente
   private actualizarDatos(datosActualizados: SvgBase[]): void {
     datosActualizados.forEach((nuevoDato: SvgBase) => {
-      const elementoExistente = this.elementos.find(elemento => elemento.id == nuevoDato.id);
+      const elementoExistente = this.elementos.find(elemento => elemento.idElemento == nuevoDato.idElemento);
     if (elementoExistente) {
       // Actualizar propiedades del elemento existente con los valores del nuevo dato
       Object.assign(elementoExistente, nuevoDato);
@@ -145,7 +157,7 @@ export class DataService2 implements IpersistenciaSvg {
       const updatedText = modifiedObject.text!;
 
       // Busca y actualiza el elemento correspondiente en la lista local
-      const elementoActualizado = this.elementos.find(elemento => elemento.id === updatedId);
+      const elementoActualizado = this.elementos.find(elemento => elemento.idElemento === updatedId);
       if (elementoActualizado) {
         elementoActualizado.text = updatedText;
 

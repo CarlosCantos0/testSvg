@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { fabric } from 'fabric';
-import { LineCodoMap } from '../components/vista-previa/vista-previa.component';
+import { LineCodoMap } from '../components/vista-previa/pages/vista-previa.component';
 
 interface lineaParams {
   lineaOriginal?: fabric.Line;

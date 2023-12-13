@@ -1,0 +1,43 @@
+<div class="container">
+  <div class="form-container">
+    <img fxFlexAlign="center" class="login-image"  src="assets/svg.png" width="50" height="50" />
+    <h1>Página de Registro</h1>
+    <form [formGroup]="registrationForm" (ngSubmit)="onSubmit()">
+      <mat-form-field appearance="fill">
+        <mat-label>Nombre</mat-label>
+        <input matInput formControlName="nombre" required>
+      </mat-form-field>
+
+      <mat-form-field appearance="fill">
+        <mat-label>Alias</mat-label>
+        <input matInput formControlName="nickname">
+      </mat-form-field>
+
+      <mat-form-field appearance="fill">
+        <mat-label>Correo electrónico</mat-label>
+        <input matInput formControlName="email" [email]="true" required>
+      </mat-form-field>
+
+      <mat-form-field appearance="fill">
+        <mat-label>Contraseña</mat-label>
+        <input matInput type="password" formControlName="password" required>
+      </mat-form-field>
+
+      <mat-form-field appearance="fill">
+        <mat-label>Confirmar Contraseña</mat-label>
+        <input matInput type="password" formControlName="confirmPassword" required>
+        <mat-error *ngIf="registrationForm.hasError('passwordMismatch')">
+          Las contraseñas no coinciden
+        </mat-error>
+      </mat-form-field>
+
+      <mat-checkbox color="primary">
+        He leído y acepto los términos y condiciones
+      </mat-checkbox>
+
+
+      <button mat-raised-button color="primary" type="submit" [disabled]="registrationForm.invalid">Registrarse</button>
+
+    </form>
+  </div>
+</div>

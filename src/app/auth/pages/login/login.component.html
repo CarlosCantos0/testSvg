@@ -1,0 +1,58 @@
+<div *ngIf="!pageLoad" class="background">
+  <div class="wrapper">
+    <div class="ball-scale-multiple">
+
+    </div>
+  </div>
+</div>
+
+<div *ngIf="pageLoad" class="page" fxLayout="column" fxLayoutAlign="center center">
+  <div class="card border-radius elevation animate__animated animate__fadeIn">
+    <div class="header" fxLayout="column" fxLayoutAlign="center center">
+        <div fxLayout="row">
+          <img fxFlexAlign="center" class="login-image"  src="assets/svg.png" width="50" height="50" />
+          <div fxFlex="90" fxLayoutAlign="space-around center" class="title-login animate__animated animate__zoomIn">{{nombreWeb}}</div>
+        </div>
+    </div>
+    <br />
+    <div class="padding" fxLayout="column" fxLayoutGap="16px" [formGroup]="form">
+      <div fxFlex="auto" fxLayout="column">
+        <mat-form-field fxFlex="grow">
+          <mat-label>Usuario</mat-label>
+          <input matInput required formControlName="usuario" autocomplete="off" >
+          <mat-error *ngIf="form.get('usuario')!.hasError('required')">Se necesita un usuario</mat-error>
+        </mat-form-field>
+        <mat-form-field fxFlex="grow">
+          <mat-label>Password</mat-label>
+          <input matInput [type]="inputType" formControlName="password" required (keyup.enter)="login()">
+          <button type="button" mat-icon-button matSuffix (click)="toggleVisibility()" matTooltip="Mostrar / ocultar contraseña">
+            <mat-icon *ngIf="visible">visibility</mat-icon>
+            <mat-icon *ngIf="!visible">visibility_off</mat-icon>
+          </button>
+
+          <!-- <mat-hint>Click the eye to toggle visibility</mat-hint> -->
+          <mat-error *ngIf="form.get('password')!.hasError('required')">Se necesita una contraseña</mat-error>
+        </mat-form-field>
+      </div>
+
+      <a class="recovery-password" [routerLink]="['/sign-up']">Registrarse</a>
+      <br />
+      <br />
+      <br />
+
+      <button type="button" class="primary button-login"  mat-raised-button (click)="login()" [disabled]="loading" cdkFocusInitial >
+        <mat-icon *ngIf="loading">
+            <mat-spinner color="accent" diameter="20"></mat-spinner>
+        </mat-icon>
+        Entrar
+      </button>
+
+      <div *ngIf="errorMessage != ''">
+        <label class="error"> {{errorMessage}}</label>
+      </div>
+
+      <mat-error *ngIf="validarEmail">Pulse <a routerLink='/Usuarios/ReenvioConfirmarEmail'>aquí</a> para validar su email</mat-error>
+
+    </div>
+  </div>
+</div>

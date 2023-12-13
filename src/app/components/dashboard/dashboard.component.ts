@@ -19,9 +19,9 @@ export class DashboardComponent implements OnInit{
   }
 
   getElementosAlmacen() {
-    const elementosAlmacen = this.dataService.leerJson()
-      .then(data => {
-        this.elementosAlmacen = data;
-      })
+    //const elementosAlmacen = this.dataService.leerJson(this.dataService.getId())
+      //.then(data => {
+        //this.elementosAlmacen = data;
+      //})
   }
 }

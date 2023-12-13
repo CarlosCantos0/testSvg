@@ -1,3 +1,9 @@
+ <app-lista-esquemas *ngIf="seleccionandoEsquema" (idEsquemaSeleccionado)="setId($event)"></app-lista-esquemas>
+
+
+
+<div *ngIf="!seleccionandoEsquema">
+  <button mat-button class="tamaño-boton" (click)="Volver()">Volver</button>
 <mat-menu #contextMenu="matMenu">
   <button mat-menu-item (click)="traerAlFrente()">Traer al frente</button>
   <button mat-menu-item (click)="llevarAlFondo()">Llevar al fondo</button>
@@ -15,7 +21,7 @@
       </div>
       <mat-list-item *ngFor="let figura of getFigurasPorTipo('rect'); let i = index"
         (click)="seleccionarFiguraLista(figura!)">
-        <button mat-raised-button color="primary" class="tamaño-lista">
+        <button mat-raised-button class="tamaño-lista">
           Cuadrado {{ i + 1 }}
         </button>
       </mat-list-item>
@@ -25,7 +31,7 @@
       </div>
       <mat-list-item *ngFor="let figura of getFigurasPorTipo('line'); let i = index"
         (click)="seleccionarFiguraLista(figura!)">
-        <button mat-raised-button color="primary" class="tamaño-lista">
+        <button mat-raised-button class="tamaño-lista">
           Línea {{ i + 1 }}
         </button>
       </mat-list-item>
@@ -35,7 +41,7 @@
       </div>
       <mat-list-item *ngFor="let figura of getFigurasPorTipo('text'); let i = index"
         (click)="seleccionarFiguraLista(figura!)">
-        <button mat-raised-button color="primary" class="tamaño-lista">
+        <button mat-raised-button class="tamaño-lista">
           Texto {{ i + 1 }}
         </button>
       </mat-list-item>
@@ -93,18 +99,18 @@
     <div *ngIf="esLinea(objetoSeleccionado!)" class="dashed-line"></div>
   </div>
   <div class="botones">
-  <button class="tamaño-boton" (click)="persistirSVG()">Persistir SVG</button>
-  <button class="tamaño-boton" (click)="limpiarCanvas()">Limpiar esquema SVG</button>
-  <button class="tamaño-boton" (click)="devolverAlmacen()">Log del almacen</button>
-  <button class="tamaño-boton" (click)="cargar()">Refrescar datos</button>
-  <button class="tamaño-boton" (click)="leerTiempoReal()">Almacen Tiempo Real</button>
-  <button class="tamaño-boton"
+  <button mat-button class="tamaño-boton" (click)="persistirSVG()">Persistir SVG</button>
+  <button mat-button class="tamaño-boton" (click)="limpiarCanvas()">Limpiar esquema SVG</button>
+  <!-- <button class="tamaño-boton" (click)="devolverAlmacen()">Log del almacen</button> -->
+  <button mat-button class="tamaño-boton" (click)="cargar()">Refrescar datos</button>
+  <button mat-button class="tamaño-boton" (click)="leerTiempoReal()">Almacen Tiempo Real</button>
+  <button mat-button class="tamaño-boton"
     (click)="crearNuevaFigura(figuraService.crearCuadradoGenerico)">CrearCuadradoGenerico</button>
-  <button class="tamaño-boton" (click)="crearNuevaFigura(figuraService.crearLineaGenerica)">Crear Línea</button>
-  <button class="tamaño-boton" (click)="crearNuevaFigura(figuraService.crearTextoGenerico)">Crear Texto</button>
-  <br>
-  <br>
-  <br>
-  <input type="file" (change)="handleFileInput($event)" accept=".svg" />
+  <button mat-button class="tamaño-boton" (click)="crearNuevaFigura(figuraService.crearLineaGenerica)">Crear Línea</button>
+  <button mat-button class="tamaño-boton" (click)="crearNuevaFigura(figuraService.crearTextoGenerico)">Crear Texto</button>
+  <button mat-button class="tamaño-boton" (click)="exportSvg()">Exportar SVG</button>
 </div>
 </div>
+</div>
+
+

@@ -4,8 +4,8 @@ import { IpersistenciaSvg } from '../interfaces/ipersistencia-svg';
 import { DataService } from './data.service';
 import { HttpClient } from '@angular/common/http';
 import { DataService2 } from './DataService2.service';
-import { Subject } from 'rxjs';
-import { SvgBase } from '../interfaces/svgBase.interface';
+import { EsquemaService } from './esquema.service';
+import { IEsquema } from '../interfaces/iesquemas';
 
 @Injectable({
   providedIn: 'root'
@@ -21,7 +21,7 @@ export class ProviderService {
 
   async instanciarServicioPersistencia(): Promise<IpersistenciaSvg> {
     const configuracion = await this.configService.obtenerServicios();
-    let nombreServicio = configuracion[0].nombreServicio;
+    let nombreServicio = configuracion[0];  //.nombreServicio; en el caso de tener una petición HTTP en la configuración
     switch (nombreServicio) {
       case 'DataService':
         console.log('dataService');
@@ -31,6 +31,10 @@ export class ProviderService {
         return new DataService2(this.http);
     }
     return new DataService(this.http);
+  }
+
+  async instanciarServicioEsquemas(): Promise<IEsquema> {
+    return new EsquemaService(this.http);
   }
 
 }

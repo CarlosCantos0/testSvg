@@ -4,36 +4,16 @@ import { EventEmitter } from "@angular/core";
 
 export interface IpersistenciaSvg {
   //Operaciones principales para el servicio
-  leerJson(): Promise<SvgBase[]>;
+  leerJson(id: number): Promise<SvgBase[]>;
   guardarSvg(elementos: SvgBase[]): Promise<SvgBase[]>;
   leerTiempoReal(): void;
 
   //Operaciones secundarias
-  eliminarElemento(elemento: fabric.Object): Observable<any>;
+  setId(id: number): void;
+  getId(): Observable<number | null>;
 
   // Definir el Subject para actualizaciones de datos
   elementosGestor: Subject<SvgBase[]>;
 
   cambioTexto: EventEmitter<void>;
 }
-
-
-// export interface iDibujar {
-//   id: number;
-//   coordX: number;
-//   coordY: number;
-//   colorRelleno: string;
-//   colorBorde: string;
-//   forma: 'linea' | 'cuadrado-rectangulo' | 'texto' | '';
-
-//   getCoordX(): void;
-//   setCoordX(x: number): void;
-//   getCoordY(): void;
-//   setCoordY(y: number): void;
-//   getColorRelleno(): void;
-//   setColorRelleno(color: string): void;
-//   getColorBorde(): void;
-//   setColorBorde(color: string): void;
-//   getForma(): void;
-//   setForma(forma: Formas): void;
-// }

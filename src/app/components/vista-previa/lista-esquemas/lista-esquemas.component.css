@@ -1,0 +1,56 @@
+/* lista-esquemas.component.css */
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 50px;
+  border: 2px solid #ccc;
+  border-radius: 10px;
+  padding: 20px;
+  max-width: 400px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.container h2 {
+  font-family: 'Times New Roman';
+  font-size: 28px;
+  font-weight: bold;
+  font-style: italic;
+  margin-bottom: 20px;
+}
+
+.container mat-list {
+  width: 100%;
+}
+
+.container mat-list mat-list-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px;
+}
+
+.container mat-list mat-list-item button {
+  text-align: left; /* Ajuste: texto a la izquierda */
+  font-size: 15px;
+}
+
+.container mat-list mat-list-item mat-icon-button {
+  margin-left: auto; /* Ajuste: icono a la derecha */
+}
+
+.container button[color="accent"] {
+  margin-top: 16px; /* Ajusta según sea necesario */
+}
+
+/* Elimina el código redundante */
+.list-item-content {
+  display: flex;
+}
+
+.iconos {
+   position: absolute;
+   left: 350px;
+   top: -3px;
+}

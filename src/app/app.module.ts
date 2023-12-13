@@ -4,24 +4,20 @@ import { BrowserModule } from '@angular/platform-browser';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { DashboardComponent } from './components/dashboard/dashboard.component';
-import { VistaPreviaComponent } from './components/vista-previa/vista-previa.component';
-import { FiguraService } from './services/figura.service';
-import { CodoService } from './services/codo.service';
-import { CanvasService } from './services/canvas.service';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import {MatMenuModule} from '@angular/material/menu';
 import { HttpClientModule } from '@angular/common/http';
-import { FormsModule } from '@angular/forms';
-import { MatListModule } from '@angular/material/list';
-import { MatButtonModule } from '@angular/material/button';
-import {MatFormFieldModule} from '@angular/material/form-field';
-import {MatInputModule} from '@angular/material/input';
+import { AuthModule } from './auth/auth.module';
+import { VistaPreviaModule } from './components/vista-previa/vistaprevia.module';
+import { AuthService } from './services/auth.service';
+import { HTTP_INTERCEPTORS } from '@angular/common/http';
+import { AuthInterceptorService } from './services/AuthInterceptor.service';
+
 
 @NgModule({
   declarations: [
     AppComponent,
     DashboardComponent,
-    VistaPreviaComponent,
   ],
   imports: [
     BrowserModule,
@@ -29,16 +25,16 @@ import {MatInputModule} from '@angular/material/input';
     BrowserAnimationsModule,
     MatMenuModule,
     HttpClientModule,
-    FormsModule,
-    MatListModule,
-    MatButtonModule,
-    MatFormFieldModule,
-    MatInputModule
+    AuthModule,
+    VistaPreviaModule
   ],
   providers: [
-    FiguraService,
-    CodoService,
-    CanvasService,
+    AuthService,
+    {
+      provide: HTTP_INTERCEPTORS,
+      useClass: AuthInterceptorService,
+      multi: true
+    }
   ],
   bootstrap: [AppComponent]
 })

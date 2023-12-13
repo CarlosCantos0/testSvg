@@ -1,13 +1,14 @@
 export type Formas = '' | 'rect' | 'text' | 'line'
 //export type Fuentes = 'Arial' | 'sans-serif' | 'serif' | 'monospace' | 'Times New Roman' | '';
-export type estadoBorde = '' | 'neutral' | '30min' | '10min' | 'sinCurro' | 'conCurro'
 
 
 //IndexZ va por posición de la lista de las figuras
 export interface SvgBase {
+  idElemento: number;
+  idEsquema: number;
+  idTipoElemento: number;
   rellenado: boolean;
-  id: number;
-  forma: string;
+  form: string;
   coordX: number;
   coordY: number;
   width: number;
@@ -28,6 +29,6 @@ export interface SvgBase {
   scaleY: number;
   angle: number;
   strokeDashArray: number[],
-  estadoBorde: estadoBorde,
+  estadoBorde: string,
   nombrePersonalizado: string
 }

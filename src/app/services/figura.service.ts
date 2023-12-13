@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { SvgBase, estadoBorde } from '../interfaces/svgBase.interface';
+import { SvgBase } from '../interfaces/svgBase.interface';
 import { fabric } from 'fabric';
 import { CodoService } from './codo.service';
 import { CanvasService } from './canvas.service';
@@ -24,7 +24,7 @@ export class FiguraService {
 
   //Método para crear cuadrados desde nuestro almácen
   crearRectanguloAlmacen(figura: SvgBase): fabric.Rect {
-    this.id = Number(figura.id.toString())
+    this.id = figura.idElemento
 
     const rectangulo = new fabric.Rect({
       width: figura.width,
@@ -33,13 +33,11 @@ export class FiguraService {
       top: figura.coordY,
       fill: figura.fill,
       stroke: figura.stroke,
-      name: figura.id.toString(),
+      name: figura.idElemento.toString(),
       opacity: 0.65,
+      scaleX: figura.scaleX,
+      scaleY: figura.scaleY,
       angle: figura.angle
-    });
-
-    rectangulo.on('mousedown', (options) => {
-      //this.seleccionarFigura(options.target!);
     });
 
     return rectangulo;
@@ -69,7 +67,7 @@ export class FiguraService {
 
   //Método para crear elementos de texto desde nuestro almácen
   crearTextoAlmacen(figura: SvgBase): fabric.Text {
-    this.id = Number(figura.id.toString())
+    this.id = figura.idElemento;
 
     const texto = new fabric.Text(figura.text, {
       left: figura.coordX,
@@ -78,11 +76,10 @@ export class FiguraService {
       fontSize: figura.sizeLetter,
       fill: figura.fill,
       stroke: figura.stroke,
-      name: figura.id.toString(),
+      name: figura.idElemento.toString(),
       scaleX: figura.scaleX,
       scaleY: figura.scaleY,
       angle: figura.angle
-
     });
     return texto;
   }
@@ -105,13 +102,13 @@ export class FiguraService {
 
   //Método para crear elementos de línea desde nuestro almácen
   crearLineaAlmacen(figura: SvgBase): fabric.Line {
-    this.id = Number(figura.id.toString())
+    this.id = figura.idElemento;
 
     const linea = new fabric.Line([figura.x1, figura.y1, figura.x2, figura.y2], {
       stroke: figura.stroke,
       fill: figura.fill,
       strokeWidth: figura.strokeWidth,
-      name: figura.id.toString(),
+      name: figura.idElemento.toString(),
       opacity: 0.85,
       angle: figura.angle,
       strokeDashArray: [NaN],

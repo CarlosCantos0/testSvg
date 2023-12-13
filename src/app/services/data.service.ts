@@ -1,6 +1,6 @@
 import { EventEmitter, Injectable, OnInit } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { BehaviorSubject, Observable, Subject, catchError, from, mergeMap, of, toArray } from 'rxjs';
+import { BehaviorSubject, Observable, Subject, catchError, forkJoin, from, map, mergeMap, of, tap, toArray } from 'rxjs';
 import { SvgBase } from '../interfaces/svgBase.interface';
 import { IpersistenciaSvg } from '../interfaces/ipersistencia-svg';
 import { fabric } from 'fabric';
@@ -10,7 +10,9 @@ import { fabric } from 'fabric';
 })
 export class DataService implements IpersistenciaSvg {
 
-  private baseUrl = 'http://localhost:3000';
+  private baseUrl = 'https://localhost:44387';
+  private idSubject: BehaviorSubject<number | null> = new BehaviorSubject<number | null>(null);
+
 
   constructor(private http: HttpClient) {
     this.elementosGestor.subscribe(elementos => this.elementos = elementos)
@@ -20,8 +22,8 @@ export class DataService implements IpersistenciaSvg {
   public elementosGestor: Subject<SvgBase[]> = new Subject<SvgBase[]>
   public cambioTexto = new EventEmitter<void>();
 
-  async leerJson(): Promise<SvgBase[]> {
-    return await this.getElementosAlmacenados();
+  async leerJson(id: number): Promise<SvgBase[]> {
+    return await this.getElementosAlmacenados(id);
   }
 
   public setElementos(elementos: SvgBase[]): void {
@@ -39,39 +41,18 @@ export class DataService implements IpersistenciaSvg {
       .toPromise();
   }
 
-  //Elimina la referencia del Back
-  eliminarElemento(elemento: fabric.Object): Observable<any> {
-    const httpOptions = {
-      headers: new HttpHeaders({
-        'Content-Type': 'application/json'
-      })
-    };
-
-    return this.http.delete(`${this.baseUrl}/FigurasData/${parseInt(elemento.name!)}`, httpOptions);
-  }
-
   //Cuando le damos a guardar, actualizamos los elementos existentes posteamos los demás
   private actualizarElementos(elementos: SvgBase[], httpOptions: any): Observable<any> {
-    console.log('actualizar elementos');
-    return from(elementos).pipe(
-      mergeMap(elemento =>
-        this.http.get(`${this.baseUrl}/FigurasData/${elemento.id}`).pipe(
-          catchError(() => of(null)) // Manejamos el error si el elemento no existe
-        ).pipe(
-          mergeMap(existingElement => {
-            if (existingElement) {
-              // El elemento existe, realiza un PATCH
-              return this.http.patch(`${this.baseUrl}/FigurasData/${elemento.id}`, elemento, httpOptions);
-            } else {
-              console.log(elemento)
-              // El elemento no existe, realiza un POST
-              return this.http.post(`${this.baseUrl}/FigurasData`, elemento, httpOptions);
-            }
-          })
-        )
-      ),
-      toArray()
-    );
+    console.log('actualizar elementos:', elementos);
+    return this.http.post(`${this.baseUrl}/api/Elementos/SetElementos`, elementos, httpOptions);
+}
+
+  setId(id: number): void {
+    this.idSubject.next(id);
+  }
+
+  getId(): Observable<number | null> {
+    return this.idSubject.asObservable();
   }
 
   //Almacen en tiempo real para realizar modificaciones y visualizar los resultados mientras cambian por pantalla
@@ -79,58 +60,44 @@ export class DataService implements IpersistenciaSvg {
     let iteraciones: number = 0
 
     console.log('leyendo tiempo real')
-    this.leerJson() //Leemos lo que tenemos guardado en nuestra BBDD y luego lo modificamos y se muestra en el lienzo
-      .then(elementos => {
-
-        setInterval(async () => {
-          if (elementos.length > 0) {
-            console.log(elementos);
-            if (iteraciones == 0) {
-              elementos[0].text = 'patatas'
-            }
-            if (iteraciones == 3) {
-              elementos[0].text = 'zanahoria'
-            }
-            if (iteraciones == 6) {
-              elementos[0].text = 'empanada de choclo'
-            }
-            if (iteraciones == 9) {
-              elementos[0].text = 'atún al pisto'
-            }
-            if (iteraciones == 12) {
-              elementos[0].text = 'dani master in Angular'
-            }
-            iteraciones++;
-            this.setElementos(elementos);
-            this.cambioTexto.emit(); // Emitir el evento cuando cambia el valor del texto
+    this.getId().subscribe(async (id: number | null) => {
+      const elementos = await this.leerJson(id!)
+      // .then(elementos => {
+        if (elementos.length > 0) {
+          console.log(elementos);
+          if (iteraciones == 0) {
+            elementos[0].text = 'patatas'
           }
-        }, 2500);
-      });
+          if (iteraciones == 3) {
+            elementos[0].text = 'zanahoria'
+          }
+          if (iteraciones == 6) {
+            elementos[0].text = 'empanada de choclo'
+          }
+          if (iteraciones == 9) {
+            elementos[0].text = 'atún al pisto'
+          }
+          if (iteraciones == 12) {
+            elementos[0].text = 'dani master in Angular'
+          }
+          iteraciones++;
+          this.setElementos(elementos);
+          this.cambioTexto.emit(); // Emitir el evento cuando cambia el valor del texto
+        }
+      //}, 2500);
+    });
   }
 
-  // Método para actualizar datos en la lista existente
-  // private actualizarDatos(datosActualizados: SvgBase[]): void {
-
-  //   datosActualizados.forEach((nuevoDato: SvgBase) => {
-  //     const elementoExistente = this.elementos.find(elemento => elemento.id == nuevoDato.id);
-  //     if (elementoExistente) {
-  //       // Actualizar propiedades del elemento existente con los valores del nuevo dato
-  //       Object.assign(elementoExistente, nuevoDato);
-  //     } else {
-  //       // Si el elemento no existe en la lista actual, se puede agregar si es necesario
-  //       this.elementos.push(nuevoDato);
-  //     }
-  //     //console.log(this.elementos)
-  //   });
-  // }
-
   //Devuelve todos los elementos que existen en nuestra bbdd
-  getElementosAlmacenados(): Promise<SvgBase[]> {
+  getElementosAlmacenados(id: number): Promise<SvgBase[]> {
     return new Promise((resolve, reject) => {
-      this.http.get<SvgBase[]>(`${this.baseUrl}/FigurasData`)
-        .subscribe(elementos => {
-          resolve(elementos)
-        })
-    })
+      this.http.get<{ result: SvgBase[] }>(`${this.baseUrl}/api/Esquemas/GetElementosEsquema?idEsquema=${id}`)
+        .subscribe(response => {
+          resolve(response.result);
+        }, error => {
+          console.error('Error en la solicitud HTTP:', error);
+          reject(error);
+        });
+    });
   }
 }
