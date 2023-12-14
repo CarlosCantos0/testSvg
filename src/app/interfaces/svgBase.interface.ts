@@ -1,4 +1,4 @@
-export type Formas = '' | 'rect' | 'text' | 'line'
+export type Formas = '' | 'rect' | 'text' | 'line';
 //export type Fuentes = 'Arial' | 'sans-serif' | 'serif' | 'monospace' | 'Times New Roman' | '';
 
 

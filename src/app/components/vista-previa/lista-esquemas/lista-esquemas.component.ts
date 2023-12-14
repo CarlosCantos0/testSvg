@@ -1,7 +1,5 @@
 import { Component, EventEmitter, Inject, Input, Output } from '@angular/core';
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { Router } from '@angular/router';
-import { signal } from '@preact/signals';
 import { EsquemaBase, IEsquema } from 'src/app/interfaces/iesquemas';
 import { IpersistenciaSvg } from 'src/app/interfaces/ipersistencia-svg';
 import { AuthService } from 'src/app/services/auth.service';

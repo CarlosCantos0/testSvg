@@ -1,10 +1,7 @@
 import { ApiResponse, IEsquema } from './../interfaces/iesquemas';
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { ProviderService } from './provider.service';
-import { IpersistenciaSvg } from '../interfaces/ipersistencia-svg';
 import { EsquemaBase } from '../interfaces/iesquemas';
-import { Observable, Subject } from 'rxjs';
 
 @Injectable({
   providedIn: 'root',

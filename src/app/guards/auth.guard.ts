@@ -1,7 +1,6 @@
 import { Injectable } from '@angular/core';
 import { ActivatedRouteSnapshot, RouterStateSnapshot, Router } from '@angular/router';
 import { UserHelper } from '../helpers/user.helper';
-import { inject } from '@angular/core';
 
 @Injectable({
   providedIn: 'root',
