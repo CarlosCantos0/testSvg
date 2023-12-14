@@ -5,6 +5,7 @@ import { UserHelper } from 'src/app/helpers/user.helper';
 import { AuthService } from 'src/app/services/auth.service';
 import { environment } from 'src/environments/environment';
 import { Usuario } from './models/usuario.model';
+import { JwtHelperService } from '@auth0/angular-jwt';
 
 @Component({
   selector: 'app-login',
@@ -28,9 +29,11 @@ export class LoginComponent implements OnInit {
               private fb: FormBuilder,
               private cd: ChangeDetectorRef,
               private authService: AuthService,
-              private userHelper: UserHelper
+              private userHelper: UserHelper,
+              public jwtHelper: JwtHelperService
   ) {
-    if(localStorage.getItem('token')) {
+    const token = localStorage.getItem('token');
+    if(localStorage.getItem('token') !== null && !this.jwtHelper.isTokenExpired(token)) {
       router.navigate(["/vista-previa"]);
     }
   }
