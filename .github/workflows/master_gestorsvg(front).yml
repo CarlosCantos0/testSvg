@@ -3,7 +3,7 @@ name: Angular CI/CD
 on:
   push:
     branches:
-      - main # o el nombre de tu rama principal
+      - master # o el nombre de tu rama principal
 
 jobs:
   build:
@@ -16,7 +16,7 @@ jobs:
     - name: Set up Node.js
       uses: actions/setup-node@v3
       with:
-        node-version: '14'
+        node-version: '20'
 
     - name: Install dependencies
       run: npm install
@@ -31,6 +31,6 @@ jobs:
     - name: Deploy to Azure App Service
       uses: azure/webapps-deploy@v2
       with:
-        app-name: <tu-nombre-de-app-service>
-        slot-name: <tu-nombre-de-slot> # Opcional, si estás usando slots de implementación
+        app-name: elementosSvg
+        slot-name: elementos # Opcional, si estás usando slots de implementación
         publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
