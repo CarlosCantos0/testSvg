@@ -23,13 +23,14 @@ jobs:
 
     - name: Build Angular app
       run: npm run build --prod
-      
-    - name: Azure Login
-      uses: Azure/login@v1.5.1
             
   deploy:
     runs-on: ubuntu-latest
     needs: build
+    environment:
+      name: 'Production'
+      url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
+      
     steps:
     - name: Deploy to Azure App Service
       uses: azure/webapps-deploy@v2
