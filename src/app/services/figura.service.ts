@@ -79,7 +79,7 @@ export class FiguraService {
       name: figura.idElemento.toString(),
       scaleX: figura.scaleX,
       scaleY: figura.scaleY,
-      angle: figura.angle
+      angle: figura.angle,
     });
     return texto;
   }
