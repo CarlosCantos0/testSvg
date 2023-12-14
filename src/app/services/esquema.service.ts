@@ -12,7 +12,7 @@ import { Observable, Subject } from 'rxjs';
 export class EsquemaService implements IEsquema{
     constructor(private http: HttpClient) {}
 
-  private baseUrl = 'https://localhost:44387/api/Esquemas';
+  private baseUrl = 'https://gestorsvg.azurewebsites.net/api/Esquemas';
 
   async getEsquemas() {
     return await this.getEsquemasAlmacenados();

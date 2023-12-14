@@ -10,7 +10,7 @@ import { fabric } from 'fabric';
 })
 export class DataService2 implements IpersistenciaSvg {
 
-  private baseUrl = 'https://localhost:44387';
+  private baseUrl = 'https://gestorsvg.azurewebsites.net';
 
   public elementosGestor: Subject<SvgBase[]> = new Subject<SvgBase[]>
 

@@ -21,7 +21,7 @@ import { fabric } from 'fabric';
   providedIn: 'root',
 })
 export class DataService implements IpersistenciaSvg {
-  private baseUrl = 'https://localhost:44387';
+  private baseUrl = 'https://gestorsvg.azurewebsites.net';
   private idSubject: BehaviorSubject<number | null> = new BehaviorSubject<
     number | null
   >(null);

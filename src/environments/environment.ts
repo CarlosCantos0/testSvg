@@ -8,7 +8,7 @@ export const environment = {
   production: false,
   appName: 'Angular Ngrx Material Starter',
   envName: 'DEV',
-  appRoot: 'https://localhost:44387/api/',
+  appRoot: 'https://gestorsvg.azurewebsites.net/api/',
   versions: {
     app: packageJson.version,
     angular: packageJson.dependencies['@angular/core'],

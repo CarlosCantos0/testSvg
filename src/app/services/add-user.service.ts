@@ -8,7 +8,7 @@ import { Observable } from 'rxjs';
   providedIn: 'root',
 })
 export class AddUserService {
-  private baseUrl = 'https://localhost:44387';
+  private baseUrl = 'https://gestorsvg.azurewebsites.net';
 
   constructor(private http: HttpClient) {}
 
