@@ -28,13 +28,20 @@ jobs:
     runs-on: ubuntu-latest
     needs: build
     environment:
-      name: 'Production'
+      name: 'Front'
       url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
-      
+
     steps:
-    - name: Deploy to Azure App Service
-      uses: azure/webapps-deploy@v2
-      with:
-        app-name: elementosSvg
-        slot-name: elementos # Opcional, si estás usando slots de implementación
-        publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
+      - name: Download artifact from build job
+        uses: actions/download-artifact@v3
+        with:
+          name: .net-app
+
+      - name: Deploy to Azure Web App
+        id: deploy-to-webapp
+        uses: azure/webapps-deploy@v2
+        with:
+          app-name: 'gestorsvg'
+          slot-name: 'Front'
+          package: .
+          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_10B80DFF84D54D65AFC75DC738EDAB6B }}
