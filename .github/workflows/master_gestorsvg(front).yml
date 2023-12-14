@@ -37,7 +37,7 @@ jobs:
         id: deploy-to-webapp
         uses: azure/webapps-deploy@v2
         with:
-          app-name: 'gestorsvg-front'
+          app-name: 'gestorsvg'
           slot-name: 'Front'
           package: .
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_10B80DFF84D54D65AFC75DC738EDAB6B }}
