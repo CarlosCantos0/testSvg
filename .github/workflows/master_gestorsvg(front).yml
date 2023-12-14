@@ -1,57 +1,36 @@
-# Docs for the Azure Web Apps Deploy action: https://github.com/Azure/webapps-deploy
-# More GitHub Actions for Azure: https://github.com/Azure/actions
-
-name: Build and deploy ASP.Net Core app to Azure Web App - gestorsvg
+name: Angular CI/CD
 
 on:
   push:
     branches:
-      - master
-  workflow_dispatch:
+      - main # o el nombre de tu rama principal
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+    - name: Checkout code
+      uses: actions/checkout@v2
 
-      - name: Set up .NET Core
-        uses: actions/setup-dotnet@v1
-        with:
-          dotnet-version: 3.1
-          include-prerelease: true
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '14'
 
-      - name: Build with dotnet
-        run: dotnet build --configuration Release
+    - name: Install dependencies
+      run: npm install
 
-      - name: dotnet publish
-        run: dotnet publish -c Release -o ${{env.DOTNET_ROOT}}/myapp
-
-      - name: Upload artifact for deployment job
-        uses: actions/upload-artifact@v3
-        with:
-          name: .net-app
-          path: ${{env.DOTNET_ROOT}}/myapp
+    - name: Build Angular app
+      run: npm run build -- --prod
 
   deploy:
     runs-on: ubuntu-latest
     needs: build
-    environment:
-      name: 'Front'
-      url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
-    
     steps:
-      - name: Download artifact from build job
-        uses: actions/download-artifact@v3
-        with:
-          name: .net-app
-      
-      - name: Deploy to Azure Web App
-        id: deploy-to-webapp
-        uses: azure/webapps-deploy@v2
-        with:
-          app-name: 'gestorsvg'
-          slot-name: 'Front'
-          package: .
-          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_10B80DFF84D54D65AFC75DC738EDAB6B }}
+    - name: Deploy to Azure App Service
+      uses: azure/webapps-deploy@v2
+      with:
+        app-name: <tu-nombre-de-app-service>
+        slot-name: <tu-nombre-de-slot> # Opcional, si estás usando slots de implementación
+        publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
